@@ -4,7 +4,7 @@ import org.http4s._
 import org.http4s.circe._
 import org.http4s.dsl.Http4sDsl
 import org.http4s.server.blaze.BlazeBuilder
-import org.http4s.util.StreamApp
+import fs2.StreamApp
 
 object Server extends StreamApp[IO] with Http4sDsl[IO] {
   val service = HttpService[IO] {
