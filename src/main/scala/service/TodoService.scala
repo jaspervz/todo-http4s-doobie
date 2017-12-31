@@ -16,7 +16,7 @@ class TodoService(repository: TodoRepository) extends Http4sDsl[IO] {
   private implicit val encodeImportance: Encoder[Importance] = Encoder.encodeString.contramap[Importance](_.value)
 
   private implicit val decodeImportance: Decoder[Importance] = Decoder.decodeString.map[Importance](Importance.unsafeFromString)
-  
+
   val service = HttpService[IO] {
     case GET -> Root / "todos" =>
       Ok(Stream("[") ++ repository.getTodos.map(_.asJson.noSpaces).intersperse(",") ++ Stream("]"), `Content-Type`(MediaType.`application/json`))
