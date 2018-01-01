@@ -34,6 +34,10 @@ but doobie can use another effect monad.
 
 Because both http4s and doobie use an effect monad, the combination is still pure and functional.
 
+## circe
+[circe](https://github.com/circe/circe) is the recommended JSON library to use with http4s. It provides
+automatic derivation of JSON Encoders and Decoders.
+
 ## Configuration
 [pureconfig](https://github.com/pureconfig/pureconfig) is used to read the configuration file `application.conf`.
 This library allows reading a configuration into well typed objects.
