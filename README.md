@@ -11,8 +11,8 @@ Method | Url         | Description
 ------ | ----------- | -----------
 GET    | /todos      | Returns all todos.
 GET    | /todos/{id} | Returns the todo for the specified id, 404 when no todo present with this id.
-POST   | /todos      | Creates a todo, give as body json with the description and importance, returns a 201 with the created todo.
-PUT    | /todos/{id} | Updates an existing todo, give as body json with the description and importance, returns a 200 with the updated todo when a todo is present with the specified id, 404 otherwise.
+POST   | /todos      | Creates a todo, give as body JSON with the description and importance, returns a 201 with the created todo.
+PUT    | /todos/{id} | Updates an existing todo, give as body JSON with the description and importance, returns a 200 with the updated todo when a todo is present with the specified id, 404 otherwise.
 DELETE | /todos/{id} | Deletes the todo with the specified todo, 404 when no todo present with this id.
 
 ## http4s
