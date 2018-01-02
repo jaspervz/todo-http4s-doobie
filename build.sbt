@@ -18,6 +18,10 @@ val PureConfigVersion = "0.8.0"
 
 val LogbackVersion = "1.2.3"
 
+val ScalaTestVersion = "3.0.4"
+
+val ScalaMockVersion = "4.0.0"
+
 libraryDependencies ++= Seq(
   "org.http4s"            %% "http4s-blaze-server"  % Http4sVersion,
   "org.http4s"            %% "http4s-circe"         % Http4sVersion,
@@ -32,8 +36,12 @@ libraryDependencies ++= Seq(
   "org.flywaydb"          %  "flyway-core"          % FlywayVersion,
 
   "io.circe"              %% "circe-generic"        % CirceVersion,
+  "io.circe"              %% "circe-parser"         % CirceVersion % Test,
 
   "com.github.pureconfig" %% "pureconfig"           % PureConfigVersion,
 
-  "ch.qos.logback"        %  "logback-classic"      % LogbackVersion
+  "ch.qos.logback"        %  "logback-classic"      % LogbackVersion,
+
+  "org.scalatest"         %% "scalatest"            % ScalaTestVersion % Test,
+  "org.scalamock"         %% "scalamock"            % ScalaMockVersion % Test
 )
