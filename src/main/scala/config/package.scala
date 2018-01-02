@@ -1,4 +1,5 @@
 import cats.effect.IO
+import com.typesafe.config.ConfigFactory
 import pureconfig.error.ConfigReaderException
 
 package object config {
@@ -11,9 +12,9 @@ package object config {
   object Config {
     import pureconfig._
 
-    def load: IO[Config] = {
+    def load(configFile: String = "application.conf"): IO[Config] = {
       IO {
-        loadConfig[Config]
+        loadConfig[Config](ConfigFactory.load(configFile))
       }.flatMap {
         case Left(e) => IO.raiseError[Config](new ConfigReaderException[Config](e))
         case Right(config) => IO.pure(config)

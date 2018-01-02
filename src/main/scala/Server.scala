@@ -11,7 +11,7 @@ import service.TodoService
 object Server extends StreamApp[IO] with Http4sDsl[IO] {
   def stream(args: List[String], requestShutdown: IO[Unit]): Stream[IO, ExitCode] = {
     for {
-      config <- Stream.eval(Config.load)
+      config <- Stream.eval(Config.load())
       transactor <- Stream.eval(Database.transactor(config.database))
       _ <- Stream.eval(Database.initialize(transactor))
       exitCode <- BlazeBuilder[IO]

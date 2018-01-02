@@ -31,7 +31,7 @@ lazy val root = (project in file("."))
       "org.http4s"            %% "http4s-blaze-server"  % Http4sVersion,
       "org.http4s"            %% "http4s-circe"         % Http4sVersion,
       "org.http4s"            %% "http4s-dsl"           % Http4sVersion,
-      "org.http4s"            %% "http4s-blaze-client"  % Http4sVersion     % "test",
+      "org.http4s"            %% "http4s-blaze-client"  % Http4sVersion     % "it,test",
 
       "org.tpolecat"          %% "doobie-core"          % DoobieVersion,
       "org.tpolecat"          %% "doobie-h2"            % DoobieVersion,
@@ -42,7 +42,8 @@ lazy val root = (project in file("."))
       "org.flywaydb"          %  "flyway-core"          % FlywayVersion,
 
       "io.circe"              %% "circe-generic"        % CirceVersion,
-      "io.circe"              %% "circe-literal"        % CirceVersion      % "test",
+      "io.circe"              %% "circe-literal"        % CirceVersion      % "it,test",
+      "io.circe"              %% "circe-optics"         % CirceVersion      % "it",
 
       "com.github.pureconfig" %% "pureconfig"           % PureConfigVersion,
 
