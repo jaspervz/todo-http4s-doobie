@@ -3,7 +3,7 @@ package service
 import cats.effect.IO
 import fs2.Stream
 import io.circe.Json
-import io.circe.parser._
+import io.circe.literal._
 import model.{High, Low, Medium, Todo}
 import org.http4s.circe._
 import org.http4s.dsl.io._
@@ -22,48 +22,39 @@ class TodoServiceSpec extends WordSpec with MockFactory with Matchers {
       val id = 1
       val todo = Todo(None, "my todo", Low)
       (repository.createTodo _).when(todo).returns(IO.pure(todo.copy(id = Some(id))))
-      val createJson = parse(
-        s"""
-           |{
-           |  "description": "${todo.description}",
-           |  "importance": "${todo.importance.value}"
-           |}
-         """.stripMargin
-      ).right.get
+      val createJson = json"""
+        {
+          "description": ${todo.description},
+          "importance": ${todo.importance.value}
+        }"""
       val response = serve(Request[IO](POST, uri("/todos")).withBody(createJson).unsafeRunSync())
       response.status shouldBe Status.Created
-      response.as[Json].unsafeRunSync() shouldBe parse(
-        s"""
-           |{
-           |  "id": $id,
-           |  "description": "${todo.description}",
-           |  "importance": "${todo.importance.value}"
-           |}
-         """.stripMargin).right.get
+      response.as[Json].unsafeRunSync() shouldBe json"""
+        {
+          "id": $id,
+          "description": ${todo.description},
+          "importance": ${todo.importance.value}
+        }"""
     }
 
     "update a todo" in {
       val id = 1
       val todo = Todo(None, "updated todo", Medium)
       (repository.updateTodo _).when(id, todo).returns(IO.pure(Right(todo.copy(id = Some(id)))))
-      val updateJson = parse(
-        s"""
-           |{
-           |  "description": "${todo.description}",
-           |  "importance": "${todo.importance.value}"
-           |}
-         """.stripMargin).right.get
+      val updateJson = json"""
+        {
+          "description": ${todo.description},
+          "importance": ${todo.importance.value}
+        }"""
 
       val response = serve(Request[IO](PUT, Uri.unsafeFromString(s"/todos/$id")).withBody(updateJson).unsafeRunSync())
       response.status shouldBe Status.Ok
-      response.as[Json].unsafeRunSync() shouldBe parse(
-        s"""
-           |{
-           |  "id": $id,
-           |  "description": "${todo.description}",
-           |  "importance": "${todo.importance.value}"
-           |}
-         """.stripMargin).right.get
+      response.as[Json].unsafeRunSync() shouldBe json"""
+        {
+          "id": $id,
+          "description": ${todo.description},
+          "importance": ${todo.importance.value}
+        }"""
     }
 
     "return a single todo" in {
@@ -73,14 +64,12 @@ class TodoServiceSpec extends WordSpec with MockFactory with Matchers {
 
       val response = serve(Request[IO](GET, Uri.unsafeFromString(s"/todos/$id")))
       response.status shouldBe Status.Ok
-      response.as[Json].unsafeRunSync() shouldBe parse(
-        s"""
-          |{
-          |  "id": $id,
-          |  "description": "${todo.description}",
-          |  "importance": "${todo.importance.value}"
-          |}
-        """.stripMargin).right.get
+      response.as[Json].unsafeRunSync() shouldBe json"""
+        {
+          "id": $id,
+          "description": ${todo.description},
+          "importance": ${todo.importance.value}
+        }"""
     }
 
     "return all todos" in {
@@ -93,21 +82,19 @@ class TodoServiceSpec extends WordSpec with MockFactory with Matchers {
 
       val response = serve(Request[IO](GET, uri("/todos")))
       response.status shouldBe Status.Ok
-      response.as[Json].unsafeRunSync() shouldBe parse(
-        s"""
-          |[
-          | {
-          |   "id": $id1,
-          |   "description": "${todo1.description}",
-          |   "importance": "${todo1.importance.value}"
-          | },
-          | {
-          |   "id": $id2,
-          |   "description": "${todo2.description}",
-          |   "importance": "${todo2.importance.value}"
-          | }
-          |]
-        """.stripMargin).right.get
+      response.as[Json].unsafeRunSync() shouldBe json"""
+        [
+         {
+           "id": $id1,
+           "description": ${todo1.description},
+           "importance": ${todo1.importance.value}
+         },
+         {
+           "id": $id2,
+           "description": ${todo2.description},
+           "importance": ${todo2.importance.value}
+         }
+        ]"""
     }
 
     "delete a todo" in {

@@ -42,7 +42,7 @@ lazy val root = (project in file("."))
       "org.flywaydb"          %  "flyway-core"          % FlywayVersion,
 
       "io.circe"              %% "circe-generic"        % CirceVersion,
-      "io.circe"              %% "circe-parser"         % CirceVersion      % "test",
+      "io.circe"              %% "circe-literal"        % CirceVersion      % "test",
 
       "com.github.pureconfig" %% "pureconfig"           % PureConfigVersion,
 
