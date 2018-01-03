@@ -75,7 +75,7 @@ class TodoServerSpec extends WordSpec with Matchers with BeforeAndAfterAll {
     }
 
     "delete a todo" in {
-      val description = "my todo 3"
+      val description = "my todo 4"
       val importance = "low"
       val id = createTodo(description, importance)
       val deleteRequest = Request[IO](method = Method.DELETE, uri = Uri.unsafeFromString(s"$urlStart/todos/$id"))
