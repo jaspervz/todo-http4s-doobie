@@ -31,7 +31,7 @@ class TodoService(repository: TodoRepository) extends Http4sDsl[IO] {
       for {
         todo <- req.decodeJson[Todo]
         createdTodo <- repository.createTodo(todo)
-        response <- Created(createdTodo.asJson, Location(Uri.unsafeFromString(s"/todos/${todo.id}")))
+        response <- Created(createdTodo.asJson, Location(Uri.unsafeFromString(s"/todos/${createdTodo.id.get}")))
       } yield response
 
     case req @ PUT -> Root / "todos" / LongVar(id) =>
