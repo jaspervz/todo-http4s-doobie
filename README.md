@@ -15,6 +15,23 @@ POST   | /todos      | Creates a todo, give as body JSON with the description an
 PUT    | /todos/{id} | Updates an existing todo, give as body JSON with the description and importance, returns a 200 with the updated todo when a todo is present with the specified id, 404 otherwise.
 DELETE | /todos/{id} | Deletes the todo with the specified todo, 404 when no todo present with this id.
 
+Here are some examples on how to use the microservice with curl, assuming it runs on the default port 8080:
+
+Create a todo:
+```curl -X POST --header "Content-Type: application/json" --data '{"description": "my todo", "importance": "high"}' http://localhost:8080/todos```
+
+Get all todos:
+```curl http://localhost:8080/todos```
+
+Get a single todo (assuming the id of the todo is 1):
+```curl http://localhost:8080/todos/1```
+
+Update a todo (assuming the id of the todo is 1):
+```curl -X PUT --header "Content-Type: application/json" --data '{"description": "my todo", "importance": "low"}' http://localhost:8080/todos/1```
+
+Delete a todo (assuming the id of the todo is 1):
+```curl -X DELETE http://localhost:8080/todos/1```
+
 ## http4s
 [http4s](http://http4s.org/) is used as the HTTP layer. http4s provides streaming and functional HTTP for Scala.
 This example project uses [cats-effect](https://github.com/typelevel/cats-effect), but is possible to use
