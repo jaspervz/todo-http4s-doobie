@@ -14,7 +14,7 @@ lazy val FlywayVersion = "4.2.0"
 
 lazy val CirceVersion = "0.9.0-M3"
 
-lazy val PureConfigVersion = "0.8.0"
+lazy val PureConfigVersion = "0.9.0"
 
 lazy val LogbackVersion = "1.2.3"
 
