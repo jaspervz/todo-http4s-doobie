@@ -7,6 +7,7 @@ import org.http4s.dsl.Http4sDsl
 import org.http4s.server.blaze.BlazeBuilder
 import repository.TodoRepository
 import service.TodoService
+import scala.concurrent.ExecutionContext.Implicits.global
 
 object Server extends StreamApp[IO] with Http4sDsl[IO] {
   def stream(args: List[String], requestShutdown: IO[Unit]): Stream[IO, ExitCode] = {

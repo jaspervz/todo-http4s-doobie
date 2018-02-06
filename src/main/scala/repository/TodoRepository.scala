@@ -11,7 +11,7 @@ class TodoRepository(transactor: Transactor[IO]) {
   private implicit val importanceMeta: Meta[Importance] = Meta[String].xmap(Importance.unsafeFromString, _.value)
 
   def getTodos: Stream[IO, Todo] = {
-    sql"SELECT id, description, importance FROM todo".query[Todo].process.transact(transactor)
+    sql"SELECT id, description, importance FROM todo".query[Todo].stream.transact(transactor)
   }
 
   def getTodo(id: Long): IO[Either[TodoNotFoundError.type, Todo]] = {
