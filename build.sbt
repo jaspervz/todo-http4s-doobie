@@ -4,17 +4,17 @@ lazy val commonSettings = Seq(
   scalaVersion := "2.12.4"
 )
 
-lazy val Http4sVersion = "0.18.0"
+lazy val Http4sVersion = "0.18.7"
 
-lazy val DoobieVersion = "0.5.1"
+lazy val DoobieVersion = "0.5.2"
 
 lazy val H2Version = "1.4.192"
 
 lazy val FlywayVersion = "4.2.0"
 
-lazy val CirceVersion = "0.9.1"
+lazy val CirceVersion = "0.9.3"
 
-lazy val PureConfigVersion = "0.9.0"
+lazy val PureConfigVersion = "0.9.1"
 
 lazy val LogbackVersion = "1.2.3"
 
