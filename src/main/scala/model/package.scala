@@ -15,5 +15,5 @@ package object model {
 
   case class Contact(id: Option[Long], description: String, importance: Importance)
 
-  case object ContactNotFound
+  case class ContactNotFound() extends RuntimeException
 }

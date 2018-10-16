@@ -43,14 +43,14 @@ class ContactService(repository: ContactRepository) extends Http4sDsl[IO] {
 
     case DELETE -> Root / "contacts" / LongVar(id) =>
       repository.deleteContact(id).flatMap {
-        case Left(ContactNotFound) => NotFound()
+        case Left(ContactNotFound()) => NotFound()
         case Right(_) => NoContent()
       }
   }
 
-  private def ContactResult(result: Either[ContactNotFound.type, Contact]) = {
+  private def ContactResult(result: Either[ContactNotFound, Contact]) = {
     result match {
-      case Left(ContactNotFound) => NotFound()
+      case Left(ContactNotFound()) => NotFound()
       case Right(contact) => Ok(contact.asJson)
     }
   }

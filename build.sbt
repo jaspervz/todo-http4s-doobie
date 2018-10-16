@@ -1,4 +1,4 @@
-import Dependencies._
+ import Dependencies._
 
 lazy val commonSettings = Seq(
   name         := "ms-contact",
