@@ -1,15 +1,14 @@
+package contact
 package repository
 
 import cats.effect.IO
-import doobie.util.transactor.Transactor
 import fs2.Stream
-import model.{Importance, Contact, ContactNotFound}
-import doobie._
+import doobie.util.transactor.Transactor
 import doobie.implicits._
 
-class ContactRepository(transactor: Transactor[IO]) {
+import model._
 
-  private implicit val importanceMeta: Meta[Importance] = Meta[String].xmap(Importance.unsafeFromString, _.value)
+class ContactRepository(transactor: Transactor[IO]) {
 
   def getContacts: Stream[IO, Contact] = sql"""
     SELECT

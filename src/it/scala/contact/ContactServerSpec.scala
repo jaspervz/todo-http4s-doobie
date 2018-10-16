@@ -1,17 +1,20 @@
+package contact
+
 import cats.effect.IO
-import config.Config
-import db.Database
-import io.circe.Json
+import io.circe._
 import io.circe.literal._
-import org.http4s.circe._
-import org.http4s.client.blaze.Http1Client
-import org.http4s.{Method, Request, Status, Uri}
-import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpec}
 import io.circe.optics.JsonPath._
+import org.http4s.circe._
+import org.http4s.client.blaze._
+import org.http4s.server.blaze._
 import org.http4s.server.{Server => Http4sServer}
-import org.http4s.server.blaze.BlazeBuilder
-import repository.ContactRepository
-import service.ContactService
+import org.http4s._
+import org.scalatest._
+
+import config._
+import db._
+import repository._
+import service._
 
 class ContactServerSpec extends WordSpec with Matchers with BeforeAndAfterAll {
   private lazy val client = Http1Client[IO]().unsafeRunSync()

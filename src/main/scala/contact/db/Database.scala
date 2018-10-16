@@ -1,9 +1,11 @@
+package contact
 package db
 
 import cats.effect.IO
-import config.DatabaseConfig
 import doobie.hikari.HikariTransactor
 import org.flywaydb.core.Flyway
+
+import config._
 
 object Database {
   def transactor(config: DatabaseConfig): IO[HikariTransactor[IO]] = {

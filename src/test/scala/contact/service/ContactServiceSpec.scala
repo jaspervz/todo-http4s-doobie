@@ -1,21 +1,23 @@
+package contact
 package service
 
 import cats.effect.IO
 import fs2.Stream
-import io.circe.Json
+import io.circe._
 import io.circe.literal._
-import model.{High, Low, Medium, Contact}
+import org.http4s._
 import org.http4s.circe._
 import org.http4s.dsl.io._
-import org.http4s.{Request, Response, Status, Uri}
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{Matchers, WordSpec}
-import repository.ContactRepository
+
+import model._
+import repository._
 
 class ContactServiceSpec extends WordSpec with MockFactory with Matchers {
-  private val repository = stub[ContactRepository]
 
-  private val service = new ContactService(repository).service
+  private val repository = stub[ContactRepository]
+  private val service    = new ContactService(repository).service
 
   "ContactService" should {
     "create a Contact" in {

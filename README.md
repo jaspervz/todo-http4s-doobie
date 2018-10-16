@@ -66,7 +66,7 @@ microservice is lost.
 Using [Flyway](https://flywaydb.org/) the database migrations are performed when starting the server.
 
 ## Tests
-This example project contains both unit tests, which mock the repository that accesses the database, and
+This example project contains both unit tests, which mock the contact.repository that accesses the database, and
 integration tests that use the [http4s](http://http4s.org/) HTTP client to perform actual requests.
 
 ## Running

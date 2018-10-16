@@ -1,15 +1,16 @@
+package contact
 package service
 
 import cats.effect.IO
-import model.{Contact, ContactNotFound}
-import org.http4s.{HttpService, MediaType, Request, Response, Uri}
+import org.http4s._
 import org.http4s.dsl.Http4sDsl
 import org.http4s.circe._
-import repository.ContactRepository
-import io.circe.generic.auto._
 import io.circe.syntax._
 import fs2.Stream
-import org.http4s.headers.{Location, `Content-Type`}
+import org.http4s.headers._
+
+import model._
+import repository._
 
 class ContactService(repository: ContactRepository) extends Http4sDsl[IO] {
 
@@ -25,20 +26,20 @@ class ContactService(repository: ContactRepository) extends Http4sDsl[IO] {
     for {
       contact        <- req.decodeJson[Contact]
       createdContact <- repository.createContact(contact)
-      response       <- Created(createdContact.asJson, Location(Uri.unsafeFromString(s"/contacts/${createdContact.id.get}")))
+      response       <- httpCreated(createdContact)
     } yield response
 
   def serveUpdatedContact(id: Long, req: Request[IO]): IO[Response[IO]] =
     for {
       contact      <- req.decodeJson[Contact]
       updateResult <- repository.updateContact(id, contact)
-      response     <- responseFromResult(updateResult)
+      response     <- httpOk(updateResult)
     } yield response
 
   def serveContactById(id: Long): IO[Response[IO]] =
     for {
-      getResult <- repository.getContact(id)
-      response  <- responseFromResult(getResult)
+      result   <- repository.getContact(id)
+      response <- httpOk(result)
     } yield response
 
   def serveDeletedContact(id: Long): IO[Response[IO]] =
@@ -55,10 +56,4 @@ class ContactService(repository: ContactRepository) extends Http4sDsl[IO] {
       `Content-Type`(MediaType.`application/json`)
     )
 
-  private def responseFromResult(result: Either[ContactNotFound, Contact]) = {
-    result match {
-      case Left(ContactNotFound()) => NotFound()
-      case Right(contact)          => Ok(contact.asJson)
-    }
-  }
 }
