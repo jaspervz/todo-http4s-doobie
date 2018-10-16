@@ -1,7 +1,7 @@
 lazy val commonSettings = Seq(
-  name := "todo http4s doobie",
-  version := "1.0-SNAPSHOT",
-  scalaVersion := "2.12.4"
+  name := "ms-contact",
+  version := "0.1.0-SNAPSHOT",
+  scalaVersion := "2.12.7"
 )
 
 lazy val Http4sVersion = "0.18.7"

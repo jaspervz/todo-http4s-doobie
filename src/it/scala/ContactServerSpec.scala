@@ -10,10 +10,10 @@ import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpec}
 import io.circe.optics.JsonPath._
 import org.http4s.server.{Server => Http4sServer}
 import org.http4s.server.blaze.BlazeBuilder
-import repository.TodoRepository
-import service.TodoService
+import repository.ContactRepository
+import service.ContactService
 
-class TodoServerSpec extends WordSpec with Matchers with BeforeAndAfterAll {
+class ContactServerSpec extends WordSpec with Matchers with BeforeAndAfterAll {
   private lazy val client = Http1Client[IO]().unsafeRunSync()
 
   private lazy val config = Config.load("test.conf").unsafeRunSync()
@@ -27,33 +27,33 @@ class TodoServerSpec extends WordSpec with Matchers with BeforeAndAfterAll {
     server.shutdown.unsafeRunSync()
   }
 
-  "Todo server" should {
-    "create a todo" in {
-      val description = "my todo 1"
+  "Contact server" should {
+    "create a Contact" in {
+      val description = "my Contact 1"
       val importance = "high"
       val createJson =json"""
         {
           "description": $description,
           "importance": $importance
         }"""
-      val request = Request[IO](method = Method.POST, uri = Uri.unsafeFromString(s"$urlStart/todos")).withBody(createJson).unsafeRunSync()
+      val request = Request[IO](method = Method.POST, uri = Uri.unsafeFromString(s"$urlStart/contacts")).withBody(createJson).unsafeRunSync()
       val json = client.expect[Json](request).unsafeRunSync()
       root.id.long.getOption(json).nonEmpty shouldBe true
       root.description.string.getOption(json) shouldBe Some(description)
       root.importance.string.getOption(json) shouldBe Some(importance)
     }
 
-    "update a todo" in {
-      val id = createTodo("my todo 2", "low")
+    "update a Contact" in {
+      val id = createContact("my Contact 2", "low")
 
-      val description = "updated todo"
+      val description = "updated Contact"
       val importance = "medium"
       val updateJson = json"""
         {
           "description": $description,
           "importance": $importance
         }"""
-      val request = Request[IO](method = Method.PUT, uri = Uri.unsafeFromString(s"$urlStart/todos/$id")).withBody(updateJson).unsafeRunSync()
+      val request = Request[IO](method = Method.PUT, uri = Uri.unsafeFromString(s"$urlStart/contacts/$id")).withBody(updateJson).unsafeRunSync()
       client.expect[Json](request).unsafeRunSync() shouldBe json"""
         {
           "id": $id,
@@ -62,11 +62,11 @@ class TodoServerSpec extends WordSpec with Matchers with BeforeAndAfterAll {
         }"""
     }
 
-    "return a single todo" in {
-      val description = "my todo 3"
+    "return a single Contact" in {
+      val description = "my Contact 3"
       val importance = "medium"
-      val id = createTodo(description, importance)
-      client.expect[Json](Uri.unsafeFromString(s"$urlStart/todos/$id")).unsafeRunSync() shouldBe json"""
+      val id = createContact(description, importance)
+      client.expect[Json](Uri.unsafeFromString(s"$urlStart/contacts/$id")).unsafeRunSync() shouldBe json"""
         {
           "id": $id,
           "description": $description,
@@ -74,35 +74,35 @@ class TodoServerSpec extends WordSpec with Matchers with BeforeAndAfterAll {
         }"""
     }
 
-    "delete a todo" in {
-      val description = "my todo 4"
+    "delete a Contact" in {
+      val description = "my Contact 4"
       val importance = "low"
-      val id = createTodo(description, importance)
-      val deleteRequest = Request[IO](method = Method.DELETE, uri = Uri.unsafeFromString(s"$urlStart/todos/$id"))
+      val id = createContact(description, importance)
+      val deleteRequest = Request[IO](method = Method.DELETE, uri = Uri.unsafeFromString(s"$urlStart/contacts/$id"))
       client.status(deleteRequest).unsafeRunSync() shouldBe Status.NoContent
 
-      val getRequest = Request[IO](method = Method.GET, uri = Uri.unsafeFromString(s"$urlStart/todos/$id"))
+      val getRequest = Request[IO](method = Method.GET, uri = Uri.unsafeFromString(s"$urlStart/contacts/$id"))
       client.status(getRequest).unsafeRunSync() shouldBe Status.NotFound
     }
 
-    "return all todos" in {
-      // Remove all existing todos
-      val json = client.expect[Json](Uri.unsafeFromString(s"$urlStart/todos")).unsafeRunSync()
+    "return all Contacts" in {
+      // Remove all existing Contacts
+      val json = client.expect[Json](Uri.unsafeFromString(s"$urlStart/contacts")).unsafeRunSync()
       root.each.id.long.getAll(json).foreach { id =>
-        val deleteRequest = Request[IO](method = Method.DELETE, uri = Uri.unsafeFromString(s"$urlStart/todos/$id"))
+        val deleteRequest = Request[IO](method = Method.DELETE, uri = Uri.unsafeFromString(s"$urlStart/contacts/$id"))
         client.status(deleteRequest).unsafeRunSync() shouldBe Status.NoContent
       }
 
-      // Add new todos
-      val description1 = "my todo 1"
-      val description2 = "my todo 2"
+      // Add new Contacts
+      val description1 = "my Contact 1"
+      val description2 = "my Contact 2"
       val importance1 = "high"
       val importance2 = "low"
-      val id1 = createTodo(description1, importance1)
-      val id2 = createTodo(description2, importance2)
+      val id1 = createContact(description1, importance1)
+      val id2 = createContact(description2, importance2)
 
-      // Retrieve todos
-      client.expect[Json](Uri.unsafeFromString(s"$urlStart/todos")).unsafeRunSync shouldBe json"""
+      // Retrieve Contacts
+      client.expect[Json](Uri.unsafeFromString(s"$urlStart/contacts")).unsafeRunSync shouldBe json"""
         [
           {
             "id": $id1,
@@ -118,13 +118,13 @@ class TodoServerSpec extends WordSpec with Matchers with BeforeAndAfterAll {
     }
   }
 
-  private def createTodo(description: String, importance: String): Long = {
+  private def createContact(description: String, importance: String): Long = {
     val createJson =json"""
       {
         "description": $description,
         "importance": $importance
       }"""
-    val request = Request[IO](method = Method.POST, uri = Uri.unsafeFromString(s"$urlStart/todos")).withBody(createJson).unsafeRunSync()
+    val request = Request[IO](method = Method.POST, uri = Uri.unsafeFromString(s"$urlStart/contacts")).withBody(createJson).unsafeRunSync()
     val json = client.expect[Json](request).unsafeRunSync()
     root.id.long.getOption(json).nonEmpty shouldBe true
     root.id.long.getOption(json).get
@@ -134,10 +134,10 @@ class TodoServerSpec extends WordSpec with Matchers with BeforeAndAfterAll {
     for {
       transactor <- Database.transactor(config.database)
       _ <- Database.initialize(transactor)
-      repository = new TodoRepository(transactor)
+      repository = new ContactRepository(transactor)
       server <- BlazeBuilder[IO]
         .bindHttp(config.server.port, config.server.host)
-        .mountService(new TodoService(repository).service, "/").start
+        .mountService(new ContactService(repository).service, "/").start
     } yield server
   }
 }

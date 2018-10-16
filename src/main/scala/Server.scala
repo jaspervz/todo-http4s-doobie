@@ -4,8 +4,8 @@ import db.Database
 import fs2.{Stream, StreamApp}
 import fs2.StreamApp.ExitCode
 import org.http4s.server.blaze.BlazeBuilder
-import repository.TodoRepository
-import service.TodoService
+import repository.ContactRepository
+import service.ContactService
 import scala.concurrent.ExecutionContext.Implicits.global
 
 object Server extends StreamApp[IO] {
@@ -16,7 +16,7 @@ object Server extends StreamApp[IO] {
       _ <- Stream.eval(Database.initialize(transactor))
       exitCode <- BlazeBuilder[IO]
         .bindHttp(config.server.port, config.server.host)
-        .mountService(new TodoService(new TodoRepository(transactor)).service, "/")
+        .mountService(new ContactService(new ContactRepository(transactor)).service, "/")
         .serve
     } yield exitCode
   }

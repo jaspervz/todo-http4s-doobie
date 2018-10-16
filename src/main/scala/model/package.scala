@@ -1,4 +1,5 @@
 package object model {
+  
   abstract sealed class Importance(val value: String)
   case object High extends Importance("high")
   case object Medium extends Importance("medium")
@@ -12,7 +13,7 @@ package object model {
     }
   }
 
-  case class Todo(id: Option[Long], description: String, importance: Importance)
+  case class Contact(id: Option[Long], description: String, importance: Importance)
 
-  case object TodoNotFoundError
+  case object ContactNotFound
 }
