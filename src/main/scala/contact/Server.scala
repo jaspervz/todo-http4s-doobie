@@ -19,7 +19,7 @@ object Server extends StreamApp[IO] {
       config     <- Stream.eval(Config.load())
       transactor <- Stream.eval(Database.transactor(config.database))
       _          <- Stream.eval(Database.initialize(transactor))
-      repository =  new ContactRepository(transactor)
+      repository =  ContactRepository(transactor)
       service    =  new ContactService(repository).service
       exitCode   <- BlazeBuilder[IO]
                       .bindHttp(config.server.port, config.server.host)

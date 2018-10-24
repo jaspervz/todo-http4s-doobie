@@ -136,11 +136,11 @@ class ContactServerSpec extends WordSpec with Matchers with BeforeAndAfterAll {
   private def createServer(): IO[Http4sServer[IO]] = {
     for {
       transactor <- Database.transactor(config.database)
-      _ <- Database.initialize(transactor)
-      repository = new ContactRepository(transactor)
-      server <- BlazeBuilder[IO]
-        .bindHttp(config.server.port, config.server.host)
-        .mountService(new ContactService(repository).service, "/").start
+      _          <- Database.initialize(transactor)
+      repository =  ContactRepository(transactor)
+      server     <- BlazeBuilder[IO]
+                      .bindHttp(config.server.port, config.server.host)
+                      .mountService(new ContactService(repository).service, "/").start
     } yield server
   }
 }
