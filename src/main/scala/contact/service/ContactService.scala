@@ -1,59 +1,76 @@
 package contact
 package service
 
-import cats.effect.IO
+import cats._
+import cats.data._
+import cats.implicits._
+import cats.effect._
+
 import org.http4s._
 import org.http4s.dsl.Http4sDsl
 import org.http4s.circe._
+
+import io.circe._
 import io.circe.syntax._
-import fs2.Stream
 import org.http4s.headers._
+
+import fs2.Stream
 
 import model._
 import repository._
 
-class ContactService(repository: Repository[IO, Contact]) extends Http4sDsl[IO] {
+class Service[A : Decoder : Encoder : Identity](
+  segment: String, repository: Repository[IO, A]
+) extends Http4sDsl[IO] {
 
-  val service = HttpService[IO] {
-    case req @ POST -> Root / "contacts"                =>  serveCreatedContact(req)
-    case req @ PUT  -> Root / "contacts" / LongVar(id)  =>  serveUpdatedContact(id, req)
-    case GET        -> Root / "contacts" / LongVar(id)  =>  serveContactById(id)
-    case DELETE     -> Root / "contacts" / LongVar(id)  =>  serveDeletedContact(id)
-    case GET        -> Root / "contacts"                =>  serveAllContacts
+  def httpService = HttpService[IO] {
+    case req @ POST -> Root / `segment`                =>  serveCreated(req)
+    case req @ PUT  -> Root / `segment` / LongVar(id)  =>  serveUpdated(id, req)
+    case GET        -> Root / `segment` / LongVar(id)  =>  serveById(id)
+    case DELETE     -> Root / `segment` / LongVar(id)  =>  serveDeleted(id)
+    case GET        -> Root / `segment`                =>  serveAll
   }
 
-  def serveCreatedContact(req: Request[IO]): IO[Response[IO]] =
+  def serveCreated(req: Request[IO]): IO[Response[IO]] =
+//    ???
     for {
-      contact  <- req.decodeJson[Contact]
-      result   <- repository.create(contact)
-      response <- httpCreated("contacts")(result)
+      entity   <- req.decodeJson[A]
+      result   <- repository.create(entity)
+      response <- httpCreated(segment)(result)
     } yield response
 
-  def serveUpdatedContact(id: Long, req: Request[IO]): IO[Response[IO]] =
+  def serveUpdated(id: Long, req: Request[IO]): IO[Response[IO]] =
     for {
-      contact  <- req.decodeJson[Contact]
-      result   <- repository.update(id, contact)
+      entity   <- req.decodeJson[A]
+      result   <- repository.update(id, entity)
       response <- httpOk(result)
     } yield response
 
-  def serveContactById(id: Long): IO[Response[IO]] =
+  def serveById(id: Long): IO[Response[IO]] =
     for {
       result   <- repository.read(id)
       response <- httpOk(result)
     } yield response
 
-  def serveDeletedContact(id: Long): IO[Response[IO]] =
+  def serveDeleted(id: Long): IO[Response[IO]] =
     repository.delete(id).flatMap {
       case Left(NotFoundError(_, _)) => NotFound()
       case Right(_)                  => NoContent()
     }
 
-  def serveAllContacts: IO[Response[IO]] =
+  def serveAll: IO[Response[IO]] =
     Ok(
       Stream("[")
-        ++ repository.getAll.map(_.asJson.noSpaces).intersperse(",")
-        ++ Stream("]"),
+      ++ repository.getAll.map(_.asJson.noSpaces).intersperse(",")
+      ++ Stream("]"),
       `Content-Type`(MediaType.`application/json`)
     )
+
+}
+
+object ContactService {
+
+  def apply[F[_] : Sync](repository: Repository[F, Contact]): Service[Contact] =
+    new Service[Contact]("contacts", repository)
 
 }

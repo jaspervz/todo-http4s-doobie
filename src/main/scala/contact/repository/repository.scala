@@ -1,5 +1,7 @@
 package contact
 
+import cats._
+import cats.implicits._
 import fs2.Stream
 
 package object repository {
@@ -20,11 +22,11 @@ package object repository {
   }
 
   abstract class CrudRepository[F[_], A : Identity] {
-    type Result[A] = F[Either[RepositoryError, A]]
-    def create(a: A): Result[A]
-    def read(id: Long): Result[A]
-    def update(id: Long, a: A): Result[A]
-    def delete(id: Long): Result[Unit]
+    // type Result[A] = F[Either[RepositoryError, A]]
+    def create(a: A): F[Either[RepositoryError, A]]
+    def read(id: Long): F[Either[RepositoryError, A]]
+    def update(id: Long, a: A): F[Either[RepositoryError, A]]
+    def delete(id: Long): F[Either[RepositoryError, A]]
   }
 
   abstract class Repository[F[_], A : Identity]

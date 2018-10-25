@@ -138,9 +138,10 @@ class ContactServerSpec extends WordSpec with Matchers with BeforeAndAfterAll {
       transactor <- Database.transactor(config.database)
       _          <- Database.initialize(transactor)
       repository =  ContactRepository(transactor)
+      service    =  ContactService(repository).httpService
       server     <- BlazeBuilder[IO]
                       .bindHttp(config.server.port, config.server.host)
-                      .mountService(new ContactService(repository).service, "/").start
+                      .mountService(service, "/").start
     } yield server
   }
 }
