@@ -21,11 +21,11 @@ object Server extends StreamApp[IO] {
       transactor <- Database.transactor(config.database).stream
       _          <- Database.initialize(transactor).stream
       repository =  ContactRepository(transactor)
-      service    =  new ContactService(repository).service
-      exitCode   <- BlazeBuilder[IO]
+      service    =  ContactService(repository)
+      code       <- BlazeBuilder[IO]
                       .bindHttp(config.server.port, config.server.host)
-                      .mountService(service, "/")
+                      .mountService(service.http, "/")
                       .serve
-    } yield exitCode
+    } yield code
 
 }

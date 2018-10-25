@@ -1,7 +1,5 @@
 package contact
 
-import fs2.Stream
-
 package object repository {
 
   sealed trait RepositoryError
@@ -16,15 +14,16 @@ package object repository {
   }
 
   trait StreamingRepository[F[_], A] {
+    import fs2.Stream
     def getAll: Stream[F, A]
   }
 
   abstract class CrudRepository[F[_], A : Identity] {
-    type Result[A] = F[Either[RepositoryError, A]]
-    def create(a: A): Result[A]
-    def read(id: Long): Result[A]
-    def update(id: Long, a: A): Result[A]
-    def delete(id: Long): Result[Unit]
+    type Result[A] = Either[RepositoryError, A]
+    def create(a: A): F[Result[A]]
+    def read(id: Long): F[Result[A]]
+    def update(id: Long, a: A): F[Result[A]]
+    def delete(id: Long): F[Result[Unit]]
   }
 
   abstract class Repository[F[_], A : Identity]
