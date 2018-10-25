@@ -6,6 +6,7 @@ import cats.implicits._
 import fs2.Stream
 import doobie.util.transactor.Transactor
 import doobie.implicits._
+
 import model._
 
 
