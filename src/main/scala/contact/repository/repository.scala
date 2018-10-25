@@ -1,12 +1,11 @@
 package contact
 
-import doobie.util.transactor.Transactor
 import fs2.Stream
 
 package object repository {
 
   sealed trait RepositoryError
-  case class NotFoundError(name: String, id: Long) extends RepositoryError
+  case class NotFoundError(entity: String, id: Long) extends RepositoryError
 
   trait Identity[A] {
     def id(a: A): Option[Long]
@@ -28,7 +27,7 @@ package object repository {
     def delete(id: Long): Result[Unit]
   }
 
-  abstract class Repository[F[_], A : Identity](transactor: Transactor[F])
+  abstract class Repository[F[_], A : Identity]
     extends CrudRepository[F, A] with StreamingRepository[F, A]
 
 }

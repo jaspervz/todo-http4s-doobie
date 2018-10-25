@@ -12,7 +12,7 @@ import model._
 object ContactRepository {
 
   def apply[F[_] : Monad](transactor: Transactor[F]): Repository[F, Contact] =
-    new Repository[F, Contact](transactor) {
+    new Repository[F, Contact] {
 
       def getAll: Stream[F, Contact] = sql"""
         SELECT
