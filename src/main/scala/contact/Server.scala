@@ -4,11 +4,12 @@ import fs2._
 import fs2.StreamApp._
 import cats.effect.IO
 import org.http4s.server.blaze.BlazeBuilder
+
 import db._
 import repository._
 import service._
 import config._
-import contact.model.Contact
+import util.stream._
 
 object Server extends StreamApp[IO] {
 
@@ -16,11 +17,11 @@ object Server extends StreamApp[IO] {
 
   def stream(args: List[String], requestShutdown: IO[Unit]): Stream[IO, ExitCode] =
     for {
-      config     <- Stream.eval(Config.load())
-      transactor <- Stream.eval(Database.transactor(config.database))
-      _          <- Stream.eval(Database.initialize(transactor))
-      repository =  ContactRepository(transactor)
-      service    =  new Service[IO, Contact]("contacts", repository).httpService
+      config     <- Config.load().stream
+      transactor <- Database.transactor(config.database).stream
+      _          <- Database.initialize(transactor).stream
+      repository =  new ContactRepository(transactor)
+      service    =  new ContactService(repository).service
       exitCode   <- BlazeBuilder[IO]
                       .bindHttp(config.server.port, config.server.host)
                       .mountService(service, "/")
