@@ -1,5 +1,6 @@
 package contact
 
+import contact.repository.Identity
 import doobie._
 import io.circe._
 import io.circe.generic.semiauto._
@@ -40,7 +41,9 @@ package object model {
     implicit val contactDecoder: Decoder[Contact] =
       deriveDecoder[Contact]
 
+    implicit val contactIdentity: Identity[Contact] =
+      (c: Contact) => c.id
+
   }
 
-  case class ContactNotFound() extends RuntimeException
 }

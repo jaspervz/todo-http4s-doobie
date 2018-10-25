@@ -12,7 +12,7 @@ import org.http4s.headers._
 import model._
 import repository._
 
-class ContactService(repository: ContactRepository) extends Http4sDsl[IO] {
+class ContactService(repository: Repository[IO, Contact]) extends Http4sDsl[IO] {
 
   val service = HttpService[IO] {
     case req @ POST -> Root / "contacts"                =>  serveCreatedContact(req)
@@ -24,34 +24,34 @@ class ContactService(repository: ContactRepository) extends Http4sDsl[IO] {
 
   def serveCreatedContact(req: Request[IO]): IO[Response[IO]] =
     for {
-      contact        <- req.decodeJson[Contact]
-      createdContact <- repository.createContact(contact)
-      response       <- httpCreated(createdContact)
+      contact  <- req.decodeJson[Contact]
+      result   <- repository.create(contact)
+      response <- httpCreated("contacts")(result)
     } yield response
 
   def serveUpdatedContact(id: Long, req: Request[IO]): IO[Response[IO]] =
     for {
-      contact      <- req.decodeJson[Contact]
-      updateResult <- repository.updateContact(id, contact)
-      response     <- httpOk(updateResult)
+      contact  <- req.decodeJson[Contact]
+      result   <- repository.update(id, contact)
+      response <- httpOk(result)
     } yield response
 
   def serveContactById(id: Long): IO[Response[IO]] =
     for {
-      result   <- repository.getContact(id)
+      result   <- repository.read(id)
       response <- httpOk(result)
     } yield response
 
   def serveDeletedContact(id: Long): IO[Response[IO]] =
-    repository.deleteContact(id).flatMap {
-      case Left(ContactNotFound()) => NotFound()
-      case Right(_)                => NoContent()
+    repository.delete(id).flatMap {
+      case Left(NotFoundError(_, _)) => NotFound()
+      case Right(_)                  => NoContent()
     }
 
   def serveAllContacts: IO[Response[IO]] =
     Ok(
       Stream("[")
-        ++ repository.getContacts.map(_.asJson.noSpaces).intersperse(",")
+        ++ repository.getAll.map(_.asJson.noSpaces).intersperse(",")
         ++ Stream("]"),
       `Content-Type`(MediaType.`application/json`)
     )

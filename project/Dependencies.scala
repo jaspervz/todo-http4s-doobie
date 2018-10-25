@@ -15,7 +15,6 @@ object Dependencies {
 
   /** Test dependencies */
   val ScalaTestVersion  = "3.0.5"
-  val ScalaMockVersion  = "4.1.0"
   val H2Version         = "1.4.197"
   val FlywayVersion     = "5.2.0"
 
@@ -40,10 +39,9 @@ object Dependencies {
 
   val testDependencies = Seq(
     "org.scalatest"         %% "scalatest"            % ScalaTestVersion  % "it,test",
-    "org.scalamock"         %% "scalamock"            % ScalaMockVersion  % "test",
     "org.http4s"            %% "http4s-blaze-client"  % Http4sVersion     % "it,test",
     "com.h2database"        %  "h2"                   % H2Version         % "it,test",
     "io.circe"              %% "circe-literal"        % CirceVersion      % "it,test",
-    "io.circe"              %% "circe-optics"         % CirceVersion      % "it",
+    "io.circe"              %% "circe-optics"         % CirceVersion      % "it,test",
   )
 }
