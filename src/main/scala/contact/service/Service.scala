@@ -14,14 +14,13 @@ import org.http4s.headers._
 
 import fs2.Stream
 
-import model._
 import repository._
 
 class Service[F[_] : Effect, A : Decoder : Encoder : Identity](
   segment: String, repository: Repository[F, A]
 ) extends Http4sDsl[F] {
 
-  def httpService = HttpService[F] {
+  def http = HttpService[F] {
     case req @ POST -> Root / `segment`                =>  serveCreated(req)
     case req @ PUT  -> Root / `segment` / LongVar(id)  =>  serveUpdated(id, req)
     case GET        -> Root / `segment` / LongVar(id)  =>  serveById(id)
@@ -71,12 +70,5 @@ class Service[F[_] : Effect, A : Decoder : Encoder : Identity](
       case Right(a) => Created(a.asJson, Location(Uri.unsafeFromString(s"/$segment/${a.id.get}")))
       case Left(e)  => InternalServerError(e.toString)
     }
-
-}
-
-object ContactService {
-
-  def apply[F[_] : Effect](repository: Repository[F, Contact]): Service[F, Contact] =
-    new Service[F, Contact]("contacts", repository)
 
 }
