@@ -27,7 +27,7 @@ object ContactRepository {
         .stream
         .transact(transactor)
 
-      def create(contact: Contact): Result[Contact] = sql"""
+      def create(contact: Contact): F[Result[Contact]] = sql"""
         INSERT INTO
           contacts (description, importance)
         VALUES
@@ -38,7 +38,7 @@ object ContactRepository {
         .transact(transactor)
         .map(id => Right(contact.copy(id = Some(id))))
 
-      def read(id: Long): Result[Contact] = sql"""
+      def read(id: Long): F[Result[Contact]] = sql"""
         SELECT
           id,
           description,
@@ -55,7 +55,7 @@ object ContactRepository {
           case None => Left(NotFoundError("contact", id))
         }
 
-      def delete(id: Long): Result[Unit] = sql"""
+      def delete(id: Long): F[Result[Unit]] = sql"""
         DELETE FROM
           contacts
         WHERE
@@ -68,7 +68,7 @@ object ContactRepository {
           if (count == 1) Right(()) else Left(NotFoundError("contacts", id))
         )
 
-      def update(id: Long, contact: Contact): Result[Contact] = sql"""
+      def update(id: Long, contact: Contact): F[Result[Contact]] = sql"""
         UPDATE
           contacts
         SET

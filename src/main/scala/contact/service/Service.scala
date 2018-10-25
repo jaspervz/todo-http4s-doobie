@@ -1,8 +1,6 @@
 package contact
 package service
 
-import cats._
-import cats.data._
 import cats.implicits._
 import cats.effect._
 
@@ -19,11 +17,11 @@ import fs2.Stream
 import model._
 import repository._
 
-class Service[A : Decoder : Encoder : Identity](
-  segment: String, repository: Repository[IO, A]
-) extends Http4sDsl[IO] {
+class Service[F[_] : Effect, A : Decoder : Encoder : Identity](
+  segment: String, repository: Repository[F, A]
+) extends Http4sDsl[F] {
 
-  def httpService = HttpService[IO] {
+  def httpService = HttpService[F] {
     case req @ POST -> Root / `segment`                =>  serveCreated(req)
     case req @ PUT  -> Root / `segment` / LongVar(id)  =>  serveUpdated(id, req)
     case GET        -> Root / `segment` / LongVar(id)  =>  serveById(id)
@@ -31,34 +29,30 @@ class Service[A : Decoder : Encoder : Identity](
     case GET        -> Root / `segment`                =>  serveAll
   }
 
-  def serveCreated(req: Request[IO]): IO[Response[IO]] =
-//    ???
+  def serveCreated(req: Request[F]): F[Response[F]] =
     for {
       entity   <- req.decodeJson[A]
       result   <- repository.create(entity)
-      response <- httpCreated(segment)(result)
+      response <- httpCreatedOr500(result)
     } yield response
 
-  def serveUpdated(id: Long, req: Request[IO]): IO[Response[IO]] =
+  def serveUpdated(id: Long, req: Request[F]): F[Response[F]] =
     for {
       entity   <- req.decodeJson[A]
       result   <- repository.update(id, entity)
-      response <- httpOk(result)
+      response <- httpOkOr404(result)
     } yield response
 
-  def serveById(id: Long): IO[Response[IO]] =
-    for {
-      result   <- repository.read(id)
-      response <- httpOk(result)
-    } yield response
+  def serveById(id: Long): F[Response[F]] =
+    repository.read(id).flatMap(httpOkOr404)
 
-  def serveDeleted(id: Long): IO[Response[IO]] =
+  def serveDeleted(id: Long): F[Response[F]] =
     repository.delete(id).flatMap {
       case Left(NotFoundError(_, _)) => NotFound()
       case Right(_)                  => NoContent()
     }
 
-  def serveAll: IO[Response[IO]] =
+  def serveAll: F[Response[F]] =
     Ok(
       Stream("[")
       ++ repository.getAll.map(_.asJson.noSpaces).intersperse(",")
@@ -66,11 +60,23 @@ class Service[A : Decoder : Encoder : Identity](
       `Content-Type`(MediaType.`application/json`)
     )
 
+  private def httpOkOr404(result: Either[_, A]): F[Response[F]] =
+    result match {
+      case Right(a) => Ok(a.asJson)
+      case Left(_)  => NotFound()
+    }
+
+  private def httpCreatedOr500(result: Either[_, A]): F[Response[F]] =
+    result match {
+      case Right(a) => Created(a.asJson, Location(Uri.unsafeFromString(s"/$segment/${a.id.get}")))
+      case Left(e)  => InternalServerError(e.toString)
+    }
+
 }
 
 object ContactService {
 
-  def apply[F[_] : Sync](repository: Repository[F, Contact]): Service[Contact] =
-    new Service[Contact]("contacts", repository)
+  def apply[F[_] : Effect](repository: Repository[F, Contact]): Service[F, Contact] =
+    new Service[F, Contact]("contacts", repository)
 
 }
