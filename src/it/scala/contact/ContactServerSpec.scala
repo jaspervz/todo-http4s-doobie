@@ -136,7 +136,7 @@ class ContactServerSpec extends WordSpec with Matchers with BeforeAndAfterAll {
 
   private def createServer(): IO[Http4sServer[IO]] = {
     for {
-      transactor <- Database.transactor(config.database)
+      transactor <- Database.transactor[IO](config.database)
       _          <- Database.initialize(transactor)
       repository =  ContactRepository(transactor)
       service    =  ContactService(repository).http
