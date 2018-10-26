@@ -1,21 +1,23 @@
 package contact
-package repository
 
 import cats._
 import cats.implicits._
-import fs2.Stream
-import doobie.util.transactor.Transactor
+
 import doobie.implicits._
+import doobie.util.transactor._
 
-import model._
+import fs2._
 
+import fpa._
 
 object ContactRepository {
 
   def apply[F[_] : Monad](transactor: Transactor[F]): Repository[F, Contact] =
     new Repository[F, Contact] {
 
-      def getAll: Stream[F, Contact] = sql"""
+      import repository._
+
+      def readAll: Stream[F, Contact] = sql"""
         SELECT
           id,
           description,

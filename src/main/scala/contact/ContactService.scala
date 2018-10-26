@@ -1,11 +1,7 @@
 package contact
-package service
 
 import cats.effect._
-
-import model._
-import repository._
-
+import fpa._
 
 object ContactService {
 

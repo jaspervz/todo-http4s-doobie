@@ -1,11 +1,8 @@
-package contact
-package db
+package fpa
 
 import cats.effect.IO
 import doobie.hikari.HikariTransactor
 import org.flywaydb.core.Flyway
-
-import config._
 
 object Database {
 

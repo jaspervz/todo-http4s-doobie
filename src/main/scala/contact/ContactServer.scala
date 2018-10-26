@@ -1,21 +1,17 @@
 package contact
 
 import fs2._
-import fs2.StreamApp._
 import cats.effect.IO
-import org.http4s.server.blaze.BlazeBuilder
+import org.http4s.server.blaze._
 
-import db._
-import repository._
-import service._
-import config._
-import util.stream._
+import fpa._
 
-object Server extends StreamApp[IO] {
+object ContactServer extends StreamApp[IO] {
 
+  import fpa.stream._
   import scala.concurrent.ExecutionContext.Implicits.global
 
-  def stream(args: List[String], requestShutdown: IO[Unit]): Stream[IO, ExitCode] =
+  def stream(args: List[String], requestShutdown: IO[Unit]): Stream[IO, StreamApp.ExitCode] =
     for {
       config     <- Config.load().stream
       transactor <- Database.transactor(config.database).stream
