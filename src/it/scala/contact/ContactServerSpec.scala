@@ -20,7 +20,7 @@ class ContactServerSpec extends WordSpec with Matchers with BeforeAndAfterAll {
 
   private lazy val client = Http1Client[IO]().unsafeRunSync()
 
-  private lazy val config = Config.load("test.conf").unsafeRunSync()
+  private lazy val config = Config.load[IO]("test.conf").unsafeRunSync()
 
   private lazy val urlStart = s"http://${config.server.host}:${config.server.port}"
 
