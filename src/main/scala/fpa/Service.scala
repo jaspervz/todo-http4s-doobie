@@ -1,19 +1,14 @@
-package contact
-package service
+package fpa
 
-import cats.implicits._
 import cats.effect._
-
-import org.http4s._
-import org.http4s.dsl.Http4sDsl
-import org.http4s.circe._
-
+import cats.implicits._
+import fs2.Stream
 import io.circe._
 import io.circe.syntax._
+import org.http4s._
+import org.http4s.circe._
+import org.http4s.dsl.Http4sDsl
 import org.http4s.headers._
-
-import fs2.Stream
-
 import repository._
 
 class Service[F[_] : Effect, A : Decoder : Encoder : Identity](
@@ -54,7 +49,7 @@ class Service[F[_] : Effect, A : Decoder : Encoder : Identity](
   def serveAll: F[Response[F]] =
     Ok(
       Stream("[")
-      ++ repository.getAll.map(_.asJson.noSpaces).intersperse(",")
+      ++ repository.readAll.map(_.asJson.noSpaces).intersperse(",")
       ++ Stream("]"),
       `Content-Type`(MediaType.`application/json`)
     )
