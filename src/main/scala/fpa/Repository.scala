@@ -4,7 +4,7 @@ import fpa.repository._
 
 trait StreamingRepository[F[_], A] {
   import fs2.Stream
-  def readAll: Stream[F, A]
+  def stream: Stream[F, A]
 }
 
 abstract class CrudRepository[F[_], A : Identity] {
