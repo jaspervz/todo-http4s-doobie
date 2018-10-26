@@ -17,7 +17,7 @@ object ContactRepository {
 
       import repository._
 
-      def readAll: Stream[F, Contact] = sql"""
+      def stream: Stream[F, Contact] = sql"""
         SELECT
           id,
           description,

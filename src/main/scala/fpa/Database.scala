@@ -6,11 +6,10 @@ import org.flywaydb.core.Flyway
 
 object Database {
 
-  def transactor[F[_] : Async](config: DatabaseConfig): F[HikariTransactor[F]] = {
+  def transactor[F[_] : Async](config: DatabaseConfig): F[HikariTransactor[F]] =
     HikariTransactor.newHikariTransactor[F](config.driver, config.url, config.user, config.password)
-  }
 
-  def initialize[F[_] : Sync](transactor: HikariTransactor[F]): F[Unit] = {
+  def initialize[F[_] : Sync](transactor: HikariTransactor[F]): F[Unit] =
     transactor.configure { datasource =>
       Sync[F].delay {
         Flyway
@@ -20,5 +19,5 @@ object Database {
           .migrate()
       }
     }
-  }
+
 }
