@@ -3,20 +3,23 @@ import sbt._
 object Dependencies {
 
   /** Core dependencies */
-  val CatsVersion       = "1.4.0"
-  val CatsEffectVersion = "0.10.1"
+  val CatsVersion          = "1.4.0"
+  val CatsEffectVersion    = "0.10.1"
 
   /** Platform dependencies */
-  val Http4sVersion     = "0.18.19"
-  val DoobieVersion     = "0.5.3"
-  val CirceVersion      = "0.9.3"
-  val PureConfigVersion = "0.9.2"
-  val LogbackVersion    = "1.2.3"
+  val Http4sVersion        = "0.18.19"
+  val DoobieVersion        = "0.5.3"
+  val CirceVersion         = "0.9.3"
+  val PureConfigVersion    = "0.9.2"
+  val LogbackVersion       = "1.2.3"
 
   /** Test dependencies */
-  val ScalaTestVersion  = "3.0.5"
-  val H2Version         = "1.4.197"
-  val FlywayVersion     = "5.2.0"
+  val ScalaTestVersion     = "3.0.5"
+  val H2Version            = "1.4.197"
+  val FlywayVersion        = "5.2.0"
+
+  /** Build dependencies */
+  val KindProjectorVersion = "0.9.7"
 
   val coreDependencies = Seq(
     "org.typelevel"         %% "cats-core"            % CatsVersion,
@@ -44,4 +47,8 @@ object Dependencies {
     "io.circe"              %% "circe-literal"        % CirceVersion      % "it,test",
     "io.circe"              %% "circe-optics"         % CirceVersion      % "it,test",
   )
+
+  /** Build dependencies */
+  val kindProjector =
+    "org.spire-math"        %% "kind-projector"       % KindProjectorVersion
 }

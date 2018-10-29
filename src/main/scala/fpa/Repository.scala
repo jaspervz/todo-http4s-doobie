@@ -1,34 +1,28 @@
 package fpa
 
-import fpa.repository._
+import repository._
 
 trait StreamingRepository[F[_], A] {
   import fs2.Stream
   def stream: Stream[F, A]
 }
 
-abstract class CrudRepository[F[_], A : Identity] {
+abstract class CrudRepository[F[_], A : Entity[F, ?]] {
   type Result[A] = Either[RepositoryError, A]
-  def create(a: A): F[Result[A]]
-  def read(id: Long): F[Result[A]]
-  def update(id: Long, a: A): F[Result[A]]
-  def delete(id: Long): F[Result[Unit]]
+  def create(a: A): F[Result[Unit]]
+  def read(id: Identity): F[Result[A]]
+  def update(a: A): F[Result[Unit]]
+  def delete(id: Identity): F[Result[Unit]]
 }
 
-abstract class Repository[F[_], A : Identity]
+abstract class Repository[F[_], A : Entity[F, ?]](val name: String)
   extends CrudRepository[F, A] with StreamingRepository[F, A]
 
 package object repository {
 
   sealed trait RepositoryError
-  case class NotFoundError(entity: String, id: Long) extends RepositoryError
-
-  trait Identity[A] {
-    def id(a: A): Option[Long]
-  }
-
-  implicit class IdentityOps[A : Identity](a: A) {
-    def id: Option[Long] = implicitly[Identity[A]].id(a)
-  }
+  case class NotFoundError(name: String, id: Identity) extends RepositoryError
+  case class NoIdentityError(name: String)             extends RepositoryError
+  case class UpdateError(name: String, id: Identity)   extends RepositoryError
 
 }

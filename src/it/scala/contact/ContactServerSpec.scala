@@ -1,5 +1,5 @@
 package contact
-
+import cats.implicits._
 import cats.effect.IO
 
 import io.circe._
@@ -33,7 +33,7 @@ class ContactServerSpec extends WordSpec with Matchers with BeforeAndAfterAll {
 
   "Contact server" should {
     "create a Contact" in {
-      val description = "my Contact 1"
+      val description = "create contact"
       val importance = "high"
       val createJson =json"""
         {
@@ -42,15 +42,15 @@ class ContactServerSpec extends WordSpec with Matchers with BeforeAndAfterAll {
         }"""
       val request = Request[IO](method = Method.POST, uri = Uri.unsafeFromString(s"$urlStart/contacts")).withBody(createJson).unsafeRunSync()
       val json = client.expect[Json](request).unsafeRunSync()
-      root.id.long.getOption(json).nonEmpty shouldBe true
+      root.id.string.getOption(json).nonEmpty shouldBe true
       root.description.string.getOption(json) shouldBe Some(description)
       root.importance.string.getOption(json) shouldBe Some(importance)
     }
 
     "update a Contact" in {
-      val id = createContact("my Contact 2", "low")
+      val id = createContact("update contact (before)", "low")
 
-      val description = "updated Contact"
+      val description = "update contact (after)"
       val importance = "medium"
       val updateJson = json"""
         {
@@ -67,7 +67,7 @@ class ContactServerSpec extends WordSpec with Matchers with BeforeAndAfterAll {
     }
 
     "return a single Contact" in {
-      val description = "my Contact 3"
+      val description = "read contact"
       val importance = "medium"
       val id = createContact(description, importance)
       client.expect[Json](Uri.unsafeFromString(s"$urlStart/contacts/$id")).unsafeRunSync() shouldBe json"""
@@ -79,7 +79,7 @@ class ContactServerSpec extends WordSpec with Matchers with BeforeAndAfterAll {
     }
 
     "delete a Contact" in {
-      val description = "my Contact 4"
+      val description = "delete contact"
       val importance = "low"
       val id = createContact(description, importance)
       val deleteRequest = Request[IO](method = Method.DELETE, uri = Uri.unsafeFromString(s"$urlStart/contacts/$id"))
@@ -91,15 +91,15 @@ class ContactServerSpec extends WordSpec with Matchers with BeforeAndAfterAll {
 
     "return all Contacts" in {
       // Remove all existing Contacts
-      val json = client.expect[Json](Uri.unsafeFromString(s"$urlStart/contacts")).unsafeRunSync()
-      root.each.id.long.getAll(json).foreach { id =>
-        val deleteRequest = Request[IO](method = Method.DELETE, uri = Uri.unsafeFromString(s"$urlStart/contacts/$id"))
-        client.status(deleteRequest).unsafeRunSync() shouldBe Status.NoContent
-      }
+      val contacts = client.expect[Json](Uri.unsafeFromString(s"$urlStart/contacts")).unsafeRunSync()
+      root.each.id.string.getAll(contacts).map(id => {
+        val req = Request[IO](method = Method.DELETE, uri = Uri.unsafeFromString(s"$urlStart/contacts/$id"))
+        client.status(req).map(_ shouldBe Status.NoContent)
+      }).sequence.unsafeRunSync()
 
       // Add new Contacts
-      val description1 = "my Contact 1"
-      val description2 = "my Contact 2"
+      val description1 = "all contact (1)"
+      val description2 = "all contact (2)"
       val importance1 = "high"
       val importance2 = "low"
       val id1 = createContact(description1, importance1)
@@ -122,7 +122,7 @@ class ContactServerSpec extends WordSpec with Matchers with BeforeAndAfterAll {
     }
   }
 
-  private def createContact(description: String, importance: String): Long = {
+  private def createContact(description: String, importance: String): Identity = {
     val createJson =json"""
       {
         "description": $description,
@@ -130,8 +130,8 @@ class ContactServerSpec extends WordSpec with Matchers with BeforeAndAfterAll {
       }"""
     val request = Request[IO](method = Method.POST, uri = Uri.unsafeFromString(s"$urlStart/contacts")).withBody(createJson).unsafeRunSync()
     val json = client.expect[Json](request).unsafeRunSync()
-    root.id.long.getOption(json).nonEmpty shouldBe true
-    root.id.long.getOption(json).get
+    root.id.string.getOption(json).nonEmpty shouldBe true
+    Identity(root.id.string.getOption(json).get)
   }
 
   private def createServer(): IO[Http4sServer[IO]] = {

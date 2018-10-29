@@ -1,11 +1,13 @@
 package contact
 
+import cats.effect.Sync
+
 import doobie._
 
 import io.circe._
 import io.circe.generic.semiauto._
 
-import fpa.repository._
+import fpa._
 
 abstract sealed class Importance(val value: String)
 case object High   extends Importance("high")
@@ -31,7 +33,7 @@ object Importance {
 
 }
 
-case class Contact(id: Option[Long], description: String, importance: Importance)
+case class Contact(id: Option[Identity], description: String, importance: Importance)
 
 object Contact {
 
@@ -41,7 +43,20 @@ object Contact {
   implicit val contactDecoder: Decoder[Contact] =
     deriveDecoder[Contact]
 
-  implicit val contactIdentity: Identity[Contact] =
-    (c: Contact) => c.id
+  implicit def contactEntity[F[_] : Sync]: Entity[F, Contact] =
+    new Entity[F, Contact] {
+
+      val F = implicitly[Sync[F]]
+
+      def id(contact: Contact): F[Option[Identity]] =
+        F.delay(contact.id)
+
+      def withId(contact: Contact)(id: Identity): F[Contact] =
+        F.delay(contact.copy(id = Some(id)))
+
+      def withGeneratedId(contact: Contact): F[Contact] =
+        withId(contact)(Identity.generate())
+
+    }
 
 }

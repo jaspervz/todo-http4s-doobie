@@ -1,6 +1,7 @@
 package contact
 
 import cats.effect._
+
 import fpa._
 
 object ContactService {
