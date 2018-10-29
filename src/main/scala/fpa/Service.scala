@@ -1,7 +1,5 @@
 package fpa
 
-import java.util.UUID
-
 import cats.effect._
 import cats.data._
 import cats.implicits._
