@@ -1,5 +1,5 @@
 CREATE TABLE contacts (
-  id SERIAL PRIMARY KEY,
+  id          UUID PRIMARY KEY,
   description TEXT,
-  importance TEXT
+  importance  TEXT
 );

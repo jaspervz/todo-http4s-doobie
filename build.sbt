@@ -1,4 +1,4 @@
- import Dependencies._
+ import Dependencies.{kindProjector, _}
 
 lazy val commonSettings = Seq(
   name         := "ms-contact",
@@ -22,5 +22,6 @@ lazy val `ms-contact` = (project in file("."))
     commonSettings,
     Defaults.itSettings,
     dependencyOverrides ++= coreDependencies,
-    libraryDependencies ++= platformDependencies ++ testDependencies
+    libraryDependencies ++= platformDependencies ++ testDependencies,
+    addCompilerPlugin(kindProjector)
   )

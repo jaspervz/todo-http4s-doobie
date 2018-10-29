@@ -1,5 +1,7 @@
 package fpa
 
+import java.util.UUID
+
 import cats.effect._
 import cats.data._
 import cats.implicits._
@@ -15,49 +17,53 @@ import org.http4s.dsl.Http4sDsl
 import org.http4s.headers._
 
 import repository._
+import service._
 
-class Service[F[_] : Effect, A : Decoder : Encoder : Identity](
+import scala.util.Try
+
+class Service[F[_] : Effect, A : Decoder : Encoder : Entity[F, ?]](
   segment: String, repository: Repository[F, A]
 ) extends Http4sDsl[F] {
 
   type EndPoint = Kleisli[F, Request[F], Response[F]]
   val  EndPoint = Kleisli
 
+  val E = implicitly[Entity[F, A]]
+
   def http = HttpService[F] {
-    case req @ POST   -> Root / `segment`                =>  create(req)
-    case req @ PUT    -> Root / `segment` / LongVar(id)  =>  update(id)(req)
-    case req @ GET    -> Root / `segment` / LongVar(id)  =>  read(id)(req)
-    case req @ DELETE -> Root / `segment` / LongVar(id)  =>  delete(id)(req)
-    case req @ GET    -> Root / `segment`                =>  stream(req)
+    case req @ POST    -> Root / `segment`                    =>  create(req)
+    case req @ PUT     -> Root / `segment` / IdentityVar(id)  =>  update(id)(req)
+    case req @ GET     -> Root / `segment` / IdentityVar(id)  =>  read(id)(req)
+    case req @ DELETE  -> Root / `segment` / IdentityVar(id)  =>  delete(id)(req)
+    case req @ GET     -> Root / `segment`                    =>  stream(req)
   }
 
   def create: EndPoint =
     EndPoint(
       req => for {
-        entity   <- req.decodeJson[A]
+        entity   <- req.decodeJson[A].withGeneratedId
         result   <- repository.create(entity)
-        response <- httpCreatedOr500(result)
+        response <- httpCreatedOr500(entity)(result)
       } yield response
     )
 
-  def update(id: Long): EndPoint =
+  def update(id: Identity): EndPoint =
     EndPoint(
       req => for {
-        entity   <- req.decodeJson[A]
-        result   <- repository.update(id, entity)
-        response <- httpOkOr404(result)
+        entity   <- req.decodeJson[A].withId(id)
+        result   <- repository.update(entity)
+        response <- httpOkOr404(entity)(result)
       } yield response
     )
 
-  def read(id: Long): EndPoint =
-    EndPoint(
-      _ => repository.read(id).flatMap(httpOkOr404)
-    )
+  def read(id: Identity): EndPoint =
+    EndPoint(_ => repository.read(id).flatMap(httpOkOr404))
 
-  def delete(id: Long): EndPoint =
+  def delete(id: Identity): EndPoint =
     EndPoint(
-      _ => repository.delete(id).flatMap {
+      _  => repository.delete(id).flatMap {
         case Left(NotFoundError(_, _)) => NotFound()
+        case Left(error)               => InternalServerError(error.toString)
         case Right(_)                  => NoContent()
       }
     )
@@ -72,16 +78,33 @@ class Service[F[_] : Effect, A : Decoder : Encoder : Identity](
       )
     )
 
+  private def httpOkOr404(a: A)(result: Either[_, _]): F[Response[F]] =
+    result match {
+      case Left(_)  => NotFound()
+      case _        => Ok(a.asJson)
+    }
+
   private def httpOkOr404(result: Either[_, A]): F[Response[F]] =
     result match {
-      case Right(a) => Ok(a.asJson)
       case Left(_)  => NotFound()
+      case Right(a) => Ok(a.asJson)
     }
 
-  private def httpCreatedOr500(result: Either[_, A]): F[Response[F]] =
+  private def httpCreatedOr500(a: A)(result: Either[_, _]): F[Response[F]] =
     result match {
-      case Right(a) => Created(a.asJson, Location(Uri.unsafeFromString(s"/$segment/${a.id.get}")))
-      case Left(e)  => InternalServerError(e.toString)
+      case Left(e)  =>
+        InternalServerError(e.toString)
+      case _        =>
+        E.id(a).flatMap(id => Created(a.asJson, Location(Uri.unsafeFromString(s"/$segment/${id.get}"))))
     }
+}
 
+package object service {
+
+  object IdentityVar extends PathVar(Identity.apply)
+
+  protected class PathVar[A](cast: String => A) {
+    def unapply(str: String): Option[A] =
+      Try(cast(str)).toOption
+  }
 }
