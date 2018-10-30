@@ -1,20 +1,17 @@
 package contact
 import cats.implicits._
 import cats.effect.IO
-
 import io.circe._
 import io.circe.literal._
 import io.circe.optics.JsonPath._
-
 import org.http4s.circe._
 import org.http4s.client.blaze._
 import org.http4s.server.blaze._
 import org.http4s.server.{Server => Http4sServer}
 import org.http4s._
-
 import org.scalatest._
-
 import fpa._
+import org.http4s.server.middleware.Logger
 
 class ContactServerSpec extends WordSpec with Matchers with BeforeAndAfterAll {
 
@@ -139,10 +136,11 @@ class ContactServerSpec extends WordSpec with Matchers with BeforeAndAfterAll {
       transactor <- Database.transactor[IO](config.database)
       _          <- Database.initialize(transactor)
       repository =  ContactRepository(transactor)
-      service    =  ContactService(repository).http
+      service    =  ContactService(repository)
+      http       =  Logger(config.logging.logHeaders, config.logging.logBody)(service.http)
       server     <- BlazeBuilder[IO]
                       .bindHttp(config.server.port, config.server.host)
-                      .mountService(service, "/").start
+                      .mountService(http, "/").start
     } yield server
   }
 }

@@ -3,8 +3,8 @@ package contact
 import fs2._
 import cats.effect.IO
 import org.http4s.server.blaze._
-
 import fpa._
+import org.http4s.server.middleware.Logger
 
 object ContactServer extends StreamApp[IO] {
 
@@ -18,9 +18,10 @@ object ContactServer extends StreamApp[IO] {
       _          <- Database.initialize(transactor).stream
       repository =  ContactRepository(transactor)
       service    =  ContactService(repository)
+      http       =  Logger(config.logging.logHeaders, config.logging.logBody)(service.http)
       code       <- BlazeBuilder[IO]
                       .bindHttp(config.server.port, config.server.host)
-                      .mountService(service.http, "/")
+                      .mountService(http, "/")
                       .serve
     } yield code
 
