@@ -19,17 +19,18 @@ object ContactRepository {
   def apply[F[_] : Sync](transactor: Transactor[F]): Repository[F, Contact] =
     new Repository[F, Contact]("contacts") {
 
-      def stream: Stream[F, Contact] = sql"""
-        SELECT
-          id,
-          description,
-          importance
-        FROM
-          contacts
-      """
-      .query[Contact]
-      .stream
-      .transact(transactor)
+      def stream: Stream[F, Contact] =
+        sql"""
+          SELECT
+            id,
+            description,
+            importance
+          FROM
+            contacts
+        """
+        .query[Contact]
+        .stream
+        .transact(transactor)
 
       def create(contact: Contact): F[Result[Unit]] =
         sql"""
@@ -44,7 +45,8 @@ object ContactRepository {
             ${contact.importance}
           )
         """
-        .update.run
+        .update
+        .run
         .transact(transactor)
         .map(expectUpdate(contact.id))
 
@@ -96,14 +98,13 @@ object ContactRepository {
 
       private def expectUpdate(id: Option[Identity])(rowCount: Int): Result[Unit] =
         id match {
-          case None => Left(NoIdentityError("contacts"))
-          case Some(id) if (rowCount == 0) => Left(UpdateError("contacts", id))
-          case _ => Right(())
+          case None                        => Left(NoIdentityError(name))
+          case Some(id) if (rowCount == 0) => Left(UpdateError(name, id))
+          case _                           => Right(())
         }
 
       private def expectUpdate(id: Identity)(rowCount: Int): Result[Unit] =
         expectUpdate(Some(id))(rowCount)
-
     }
 
   implicit val uuidMeta: Meta[UUID] =
