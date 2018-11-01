@@ -43,20 +43,13 @@ object Contact {
   implicit val contactDecoder: Decoder[Contact] =
     deriveDecoder[Contact]
 
-  implicit def contactEntity[F[_] : Sync]: Entity[F, Contact] =
-    new Entity[F, Contact] {
-
-      val F = implicitly[Sync[F]]
+  implicit def contactEntity[F[_]](implicit F: Sync[F]): HasIdentity[F, Contact] =
+    new HasIdentity[F, Contact] {
 
       def id(contact: Contact): F[Option[Identity]] =
         F.delay(contact.id)
 
       def withId(contact: Contact)(id: Identity): F[Contact] =
         F.delay(contact.copy(id = Some(id)))
-
-      def withGeneratedId(contact: Contact): F[Contact] =
-        withId(contact)(Identity.generate())
-
     }
-
 }

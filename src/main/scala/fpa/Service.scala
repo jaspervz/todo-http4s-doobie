@@ -19,14 +19,14 @@ import service._
 
 import scala.util.Try
 
-class Service[F[_] : Effect, A : Decoder : Encoder : Entity[F, ?]](
+class Service[F[_] : Effect, A : Decoder : Encoder : HasIdentity[F, ?]](
   segment: String, repository: Repository[F, A]
 ) extends Http4sDsl[F] {
 
   type EndPoint = Kleisli[F, Request[F], Response[F]]
   val  EndPoint = Kleisli
 
-  val E = implicitly[Entity[F, A]]
+  val E = implicitly[HasIdentity[F, A]]
 
   def http = HttpService[F] {
     case req @ POST    -> Root / `segment`                    =>  create(req)

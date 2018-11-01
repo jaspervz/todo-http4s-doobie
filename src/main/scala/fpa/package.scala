@@ -1,6 +1,6 @@
 import java.util.UUID
 
-import cats.effect.Sync
+import cats._
 
 package object fpa {
 
@@ -11,20 +11,24 @@ package object fpa {
     def apply(s: String): Identity =
       UUID.fromString(s)
 
-    def generate() : Identity =
-      UUID.randomUUID
+    val generate: () => Identity =
+      () => UUID.randomUUID
   }
 
-  trait Entity[F[_], A] {
+  trait HasIdentity[F[_], A] {
+
     def id(a: A): F[Option[Identity]]
+
     def withId(a: A)(id: Identity): F[A]
-    def withGeneratedId(a: A): F[A]
+
+    def withGeneratedId(a: A): F[A] =
+      withId(a)(Identity.generate())
   }
 
-  implicit class EntityOps[F[_] : Sync, A : Entity[F, ?]](fa: F[A]) {
+  implicit class EntityOps[F[_] : FlatMap, A : HasIdentity[F, ?]](fa: F[A]) {
 
-    val F = implicitly[Sync[F]]
-    val E = implicitly[Entity[F, A]]
+    val F = implicitly[FlatMap[F]]
+    val E = implicitly[HasIdentity[F, A]]
 
     def id: F[Option[Identity]] =
       F.flatMap(fa)(E.id)

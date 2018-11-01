@@ -7,7 +7,7 @@ trait StreamingRepository[F[_], A] {
   def stream: Stream[F, A]
 }
 
-abstract class CrudRepository[F[_], A : Entity[F, ?]] {
+abstract class CrudRepository[F[_], A : HasIdentity[F, ?]](name: String) {
   type Result[A] = Either[RepositoryError, A]
   def create(a: A): F[Result[Unit]]
   def read(id: Identity): F[Result[A]]
@@ -15,8 +15,9 @@ abstract class CrudRepository[F[_], A : Entity[F, ?]] {
   def delete(id: Identity): F[Result[Unit]]
 }
 
-abstract class Repository[F[_], A : Entity[F, ?]](val name: String)
-  extends CrudRepository[F, A] with StreamingRepository[F, A]
+abstract class Repository[F[_], A : HasIdentity[F, ?]](val name: String)
+  extends CrudRepository[F, A](name)
+  with StreamingRepository[F, A]
 
 package object repository {
 
