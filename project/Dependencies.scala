@@ -48,7 +48,6 @@ object Dependencies {
     "io.circe"              %% "circe-optics"         % CirceVersion      % "it,test",
   )
 
-  /** Build dependencies */
   val kindProjector =
     "org.spire-math"        %% "kind-projector"       % KindProjectorVersion
 }
