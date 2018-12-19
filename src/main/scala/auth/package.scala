@@ -27,12 +27,14 @@ package object auth {
     */
   type CircleId = Int
 
-  /** Organisational Unit */
+  /** Organisational Unit
+    *  Team < Department < Business Unit  =:=  Clt < Circle < Super Circle
+    */
   case class OrganisationalUnit(
-     /** This organisational unit's client identifier, often abbreviated `cltId` */
+     /** This organisational unit's `team` identifier, often abbreviated `cltId` */
      clientId: ClientId
 
-     /** This organisational unit's client name, often abbreviated `cltName` */
+     /** This organisational unit's `team` name, often abbreviated `cltName` */
      , clientName: String
 
      /** This organisational unit's circle identifier */
@@ -47,13 +49,6 @@ package object auth {
      /** This organisational unit's super circle name */
      , superCircleName: String
    )
-
-  /** ???
-    * - Organisational restrictions is modeled as a set of organisational units
-    */
-  type OrganisationalRestrictions = Set[OrganisationalUnit]
-
-
 
 
   /** Twilio account details */
