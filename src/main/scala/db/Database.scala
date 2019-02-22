@@ -16,6 +16,7 @@ object Database {
         val flyWay = new Flyway()
         flyWay.setDataSource(datasource)
         flyWay.migrate()
+        ()
       }
     }
   }
