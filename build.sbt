@@ -10,23 +10,23 @@ lazy val commonSettings = Seq(
   ),
 )
 
-lazy val Http4sVersion = "0.18.7"
+lazy val Http4sVersion = "0.18.22"
 
-lazy val DoobieVersion = "0.5.2"
+lazy val DoobieVersion = "0.5.4"
 
-lazy val H2Version = "1.4.192"
+lazy val H2Version = "1.4.197"
 
-lazy val FlywayVersion = "4.2.0"
+lazy val FlywayVersion = "5.2.4"
 
 lazy val CirceVersion = "0.9.3"
 
-lazy val PureConfigVersion = "0.9.1"
+lazy val PureConfigVersion = "0.10.2"
 
 lazy val LogbackVersion = "1.2.3"
 
-lazy val ScalaTestVersion = "3.0.4"
+lazy val ScalaTestVersion = "3.0.5"
 
-lazy val ScalaMockVersion = "4.0.0"
+lazy val ScalaMockVersion = "4.1.0"
 
 lazy val root = (project in file("."))
   .configs(IntegrationTest)

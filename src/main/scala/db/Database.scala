@@ -11,10 +11,9 @@ object Database {
   }
 
   def initialize(transactor: HikariTransactor[IO]): IO[Unit] = {
-    transactor.configure { datasource =>
+    transactor.configure { dataSource =>
       IO {
-        val flyWay = new Flyway()
-        flyWay.setDataSource(datasource)
+        val flyWay = Flyway.configure().dataSource(dataSource).load()
         flyWay.migrate()
         ()
       }

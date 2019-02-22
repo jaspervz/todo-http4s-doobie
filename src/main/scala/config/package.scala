@@ -11,6 +11,7 @@ package object config {
 
   object Config {
     import pureconfig._
+    import pureconfig.generic.auto._
 
     def load(configFile: String = "application.conf"): IO[Config] = {
       IO {
