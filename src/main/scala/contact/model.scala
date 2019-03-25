@@ -1,12 +1,9 @@
 package contact
 
-import cats.effect.Sync
-
+import cats.Monad
 import doobie._
-
 import io.circe._
 import io.circe.generic.semiauto._
-
 import fpa._
 
 abstract sealed class Importance(val value: String)
@@ -43,13 +40,13 @@ object Contact {
   implicit val contactDecoder: Decoder[Contact] =
     deriveDecoder[Contact]
 
-  implicit def contactEntity[F[_]](implicit F: Sync[F]): HasIdentity[F, Contact] =
+  implicit def contactEntity[F[_]](implicit F: Monad[F]): HasIdentity[F, Contact] =
     new HasIdentity[F, Contact] {
 
       def id(contact: Contact): F[Option[Identity]] =
-        F.delay(contact.id)
+        F.pure(contact.id)
 
       def withId(contact: Contact)(id: Identity): F[Contact] =
-        F.delay(contact.copy(id = Some(id)))
+        F.pure(contact.copy(id = Some(id)))
     }
 }
