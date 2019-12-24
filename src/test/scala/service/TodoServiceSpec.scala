@@ -9,10 +9,11 @@ import org.http4s.circe._
 import org.http4s.dsl.io._
 import org.http4s.{Request, Response, Status, Uri}
 import org.scalamock.scalatest.MockFactory
-import org.scalatest.{Matchers, WordSpec}
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpec
 import repository.TodoRepository
 
-class TodoServiceSpec extends WordSpec with MockFactory with Matchers {
+class TodoServiceSpec extends AnyWordSpec with MockFactory with Matchers {
   private val repository = stub[TodoRepository]
 
   private val service = new TodoService(repository).service
