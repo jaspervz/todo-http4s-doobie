@@ -1,6 +1,9 @@
 import cats.effect.IO
 import com.typesafe.config.ConfigFactory
-import pureconfig.error.ConfigReaderException
+import pureconfig._
+import pureconfig.generic.auto._
+import pureconfig.module.catseffect.syntax._
+
 
 package object config {
   case class ServerConfig(host: String ,port: Int)
@@ -10,16 +13,8 @@ package object config {
   case class Config(server: ServerConfig, database: DatabaseConfig)
 
   object Config {
-    import pureconfig._
-    import pureconfig.generic.auto._
-
     def load(configFile: String = "application.conf"): IO[Config] = {
-      IO {
-        ConfigSource.fromConfig(ConfigFactory.load(configFile)).load[Config]
-      }.flatMap {
-        case Left(e) => IO.raiseError[Config](new ConfigReaderException[Config](e))
-        case Right(config) => IO.pure(config)
-      }
+      ConfigSource.fromConfig(ConfigFactory.load(configFile)).loadF[IO, Config]
     }
   }
 }

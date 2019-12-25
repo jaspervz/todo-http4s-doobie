@@ -51,7 +51,8 @@ lazy val root = (project in file("."))
       "io.circe"              %% "circe-literal"        % CirceVersion      % "it,test",
       "io.circe"              %% "circe-optics"         % CirceVersion      % "it",
 
-      "com.github.pureconfig" %% "pureconfig"           % PureConfigVersion,
+      "com.github.pureconfig" %% "pureconfig"             % PureConfigVersion,
+      "com.github.pureconfig" %% "pureconfig-cats-effect" % PureConfigVersion,
 
       "ch.qos.logback"        %  "logback-classic"      % LogbackVersion,
 
