@@ -1,5 +1,6 @@
-import cats.effect.{ContextShift, IO, Timer}
+import cats.effect.{Blocker, ContextShift, IO, Timer}
 import config.Config
+import doobie.util.ExecutionContexts
 import io.circe.Json
 import io.circe.literal._
 import io.circe.optics.JsonPath._
@@ -17,6 +18,8 @@ class TodoServerSpec extends AnyWordSpec with Matchers with BeforeAndAfterAll {
   private implicit val timer: Timer[IO] = IO.timer(ExecutionContext.global)
 
   private implicit val contextShift: ContextShift[IO] = IO.contextShift(ExecutionContext.global)
+
+  private implicit val bc: Blocker = Blocker.liftExecutionContext(ExecutionContexts.synchronous)
 
   private lazy val client = BlazeClientBuilder[IO](global).resource
 
