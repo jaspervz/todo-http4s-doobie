@@ -9,15 +9,16 @@ import repository.TodoRepository
 import service.TodoService
 
 object HttpServer {
-  def create(configFile: String = "application.conf")(implicit contextShift: ContextShift[IO], concurrentEffect: ConcurrentEffect[IO], timer: Timer[IO], bc: Blocker): IO[ExitCode] = {
+  def create(configFile: String = "application.conf")(implicit contextShift: ContextShift[IO], concurrentEffect: ConcurrentEffect[IO], timer: Timer[IO]): IO[ExitCode] = {
     resources(configFile).use(create)
   }
 
-  private def resources(configFile: String)(implicit contextShift: ContextShift[IO], bc: Blocker): Resource[IO, Resources] = {
+  private def resources(configFile: String)(implicit contextShift: ContextShift[IO]): Resource[IO, Resources] = {
     for {
-      config <- Resource.liftF(Config.load(configFile))
+      config <- Config.load(configFile)
       ec <- ExecutionContexts.fixedThreadPool[IO](config.database.threadPoolSize)
-      transactor <- Database.transactor(config.database, ec)
+      blocker <- Blocker[IO]
+      transactor <- Database.transactor(config.database, ec, blocker)
     } yield Resources(transactor, config)
   }
 
