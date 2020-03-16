@@ -1,2 +1,2 @@
-addSbtPlugin("org.lyranthe.sbt" % "partial-unification" % "1.1.0")
+addSbtPlugin("com.timushev.sbt" % "sbt-updates" % "0.5.0")
 addSbtPlugin("ch.epfl.scala" % "sbt-scalafix" % "0.9.1")

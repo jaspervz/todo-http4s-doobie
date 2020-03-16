@@ -15,9 +15,10 @@ object HttpServer {
 
   private def resources(configFile: String)(implicit contextShift: ContextShift[IO]): Resource[IO, Resources] = {
     for {
-      config <- Resource.liftF(Config.load(configFile))
+      config <- Config.load(configFile)
       ec <- ExecutionContexts.fixedThreadPool[IO](config.database.threadPoolSize)
-      transactor <- Database.transactor(config.database, ec)
+      blocker <- Blocker[IO]
+      transactor <- Database.transactor(config.database, ec, blocker)
     } yield Resources(transactor, config)
   }
 

@@ -7,13 +7,15 @@ import org.http4s.circe._
 import org.http4s.client.blaze.BlazeClientBuilder
 import org.http4s.{Method, Request, Status, Uri}
 import org.scalatest.BeforeAndAfterAll
+import org.scalatest.concurrent.Eventually
 import org.scalatest.matchers.should.Matchers
+import org.scalatest.time.{Millis, Seconds, Span}
 import org.scalatest.wordspec.AnyWordSpec
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class TodoServerSpec extends AnyWordSpec with Matchers with BeforeAndAfterAll {
+class TodoServerSpec extends AnyWordSpec with Matchers with BeforeAndAfterAll with Eventually {
   private implicit val timer: Timer[IO] = IO.timer(ExecutionContext.global)
 
   private implicit val contextShift: ContextShift[IO] = IO.contextShift(ExecutionContext.global)
@@ -22,12 +24,18 @@ class TodoServerSpec extends AnyWordSpec with Matchers with BeforeAndAfterAll {
 
   private val configFile = "test.conf"
 
-  private lazy val config = Config.load(configFile).unsafeRunSync()
+  private lazy val config = Config.load(configFile).use(config => IO.pure(config)).unsafeRunSync()
 
   private lazy val urlStart = s"http://${config.server.host}:${config.server.port}"
 
+  implicit override val patienceConfig: PatienceConfig = PatienceConfig(timeout = scaled(Span(5, Seconds)), interval = scaled(Span(100, Millis)))
+
   override def beforeAll(): Unit = {
     HttpServer.create(configFile).unsafeRunAsyncAndForget()
+    eventually {
+      client.use(_.statusFromUri(Uri.unsafeFromString(s"$urlStart/todos"))).unsafeRunSync() shouldBe Status.Ok
+    }
+    ()
   }
 
   "Todo server" should {
