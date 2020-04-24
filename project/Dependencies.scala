@@ -19,7 +19,7 @@ object Dependencies {
   val FlywayVersion        = "5.2.0"
 
   /** Build dependencies */
-  val KindProjectorVersion = "0.9.7"
+  val KindProjectorVersion = "0.11.0"
 
   val coreDependencies = Seq(
     "org.typelevel"         %% "cats-core"            % CatsVersion,
@@ -49,5 +49,5 @@ object Dependencies {
   )
 
   val kindProjector =
-    "org.spire-math"        %% "kind-projector"       % KindProjectorVersion
+    "org.typelevel"         %% "kind-projector"       % KindProjectorVersion cross CrossVersion.full
 }

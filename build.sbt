@@ -3,7 +3,7 @@
 lazy val commonSettings = Seq(
   name         := "ms-contact",
   version      := "0.1.0-SNAPSHOT",
-  scalaVersion := "2.12.7"
+  scalaVersion := "2.12.11"
 )
 
 scalacOptions := Seq(

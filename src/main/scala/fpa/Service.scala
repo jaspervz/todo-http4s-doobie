@@ -19,7 +19,7 @@ import service._
 
 import scala.util.Try
 
-class Service[F[_] : Effect, A : Decoder : Encoder : HasIdentity[F, ?]](
+class Service[F[_] : Effect, A : Decoder : Encoder : HasIdentity[F, *]](
   segment: String, repository: Repository[F, A]
 ) extends Http4sDsl[F] {
 

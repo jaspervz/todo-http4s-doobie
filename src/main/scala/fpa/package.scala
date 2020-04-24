@@ -25,7 +25,7 @@ package object fpa {
       withId(a)(Identity.generate())
   }
 
-  implicit class EntityOps[F[_] : FlatMap, A : HasIdentity[F, ?]](fa: F[A]) {
+  implicit class EntityOps[F[_] : FlatMap, A : HasIdentity[F, *]](fa: F[A]) {
 
     val F = implicitly[FlatMap[F]]
     val E = implicitly[HasIdentity[F, A]]
