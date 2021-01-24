@@ -1,7 +1,7 @@
 lazy val commonSettings = Seq(
   name := "todo http4s doobie",
   version := "1.0-SNAPSHOT",
-  scalaVersion := "2.13.1",
+  scalaVersion := "2.13.4",
   scalacOptions ++= Seq(
     "-deprecation",
     "-Xfatal-warnings",
@@ -10,13 +10,13 @@ lazy val commonSettings = Seq(
   ),
 )
 
-lazy val Http4sVersion = "0.21.1"
+lazy val Http4sVersion = "0.21.15"
 
 lazy val DoobieVersion = "0.8.8"
 
 lazy val H2Version = "1.4.200"
 
-lazy val FlywayVersion = "6.3.1"
+lazy val FlywayVersion = "6.3.3"
 
 lazy val CirceVersion = "0.13.0"
 
@@ -24,7 +24,7 @@ lazy val PureConfigVersion = "0.12.3"
 
 lazy val LogbackVersion = "1.2.3"
 
-lazy val ScalaTestVersion = "3.1.1"
+lazy val ScalaTestVersion = "3.1.4"
 
 lazy val ScalaMockVersion = "4.4.0"
 
