@@ -80,7 +80,8 @@ class TodoServiceSpec extends AnyWordSpec with MockFactory with Matchers {
       val id2 = 2
       val todo2 = Todo(Some(id2), "my todo 2", Medium)
       val todos = Stream(todo1, todo2)
-      (repository.getTodos _).when().returns(todos)
+      (() => repository.getTodos ).when().returns(todos)
+      //(repository.getTodos _).when().returns(todos)
 
       val response = serve(Request[IO](GET, uri"/todos"))
       response.status shouldBe Status.Ok
