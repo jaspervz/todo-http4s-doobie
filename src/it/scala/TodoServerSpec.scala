@@ -113,7 +113,7 @@ class TodoServerSpec extends AnyWordSpec with Matchers with BeforeAndAfterAll wi
       val id2 = createTodo(description2, importance2)
 
       // Retrieve todos
-      client.use(_.expect[Json](Uri.unsafeFromString(s"$urlStart/todos"))).unsafeRunSync shouldBe json"""
+      client.use(_.expect[Json](Uri.unsafeFromString(s"$urlStart/todos"))).unsafeRunSync() shouldBe json"""
         [
           {
             "id": $id1,
