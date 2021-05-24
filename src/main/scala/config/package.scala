@@ -1,4 +1,4 @@
-import cats.effect.{Blocker, ContextShift, IO, Resource}
+import cats.effect._
 import com.typesafe.config.ConfigFactory
 import pureconfig._
 import pureconfig.generic.auto._
@@ -13,9 +13,9 @@ package object config {
   case class Config(server: ServerConfig, database: DatabaseConfig)
 
   object Config {
-    def load(configFile: String = "application.conf")(implicit cs: ContextShift[IO]): Resource[IO, Config] = {
-      Blocker[IO].flatMap { blocker =>
-        Resource.liftF(ConfigSource.fromConfig(ConfigFactory.load(configFile)).loadF[IO, Config](blocker))
+    def load[F[_]: Sync: ContextShift](configFile: String = "application.conf"): Resource[F, Config] = {
+      Blocker[F].flatMap { blocker =>
+        Resource.eval(ConfigSource.fromConfig(ConfigFactory.load(configFile)).loadF[F, Config](blocker))
       }
     }
   }

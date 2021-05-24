@@ -1,54 +1,60 @@
 package service
 
-import cats.effect.IO
-import fs2.Stream
-import io.circe.generic.auto._
-import io.circe.syntax._
-import io.circe.{Decoder, Encoder}
-import model.{Importance, Todo, TodoNotFoundError}
-import org.http4s.circe._
-import org.http4s.dsl.Http4sDsl
-import org.http4s.headers.{Location, `Content-Type`}
-import org.http4s.{HttpRoutes, MediaType, Uri}
+import model._
+import model.DbError._
 import repository.TodoRepository
 
-class TodoService(repository: TodoRepository) extends Http4sDsl[IO] {
-  private implicit val encodeImportance: Encoder[Importance] = Encoder.encodeString.contramap[Importance](_.value)
+import cats._
+import cats.effect._
+import cats.implicits._
+import io.circe.syntax._
+import org.http4s.circe._
+import org.http4s.circe.CirceEntityEncoder._
+import org.http4s.dsl.Http4sDsl
+import org.http4s.server.Router
+import org.http4s.headers.Location
+import org.http4s.{HttpRoutes, Uri}
 
-  private implicit val decodeImportance: Decoder[Importance] = Decoder.decodeString.map[Importance](Importance.unsafeFromString)
+class TodoService[F[_]: Sync: Defer: JsonDecoder](repository: TodoRepository[F]) extends Http4sDsl[F] {
 
-  val routes = HttpRoutes.of[IO] {
-    case GET -> Root / "todos" =>
-      Ok(Stream("[") ++ repository.getTodos.map(_.asJson.noSpaces).intersperse(",") ++ Stream("]"), `Content-Type`(MediaType.application.json))
+  private val prefixPath = "/todos"
 
-    case GET -> Root / "todos" / LongVar(id) =>
+  private val httpRoutes = HttpRoutes.of[F] {
+    case GET -> Root  =>
+      Ok(repository.getTodos)
+
+    case GET -> Root / LongVar(id) =>
       for {
         getResult <- repository.getTodo(id)
         response <- todoResult(getResult)
       } yield response
 
-    case req @ POST -> Root / "todos" =>
+    case req @ POST -> Root =>
       for {
         todo <- req.decodeJson[Todo]
         createdTodo <- repository.createTodo(todo)
         response <- Created(createdTodo.asJson, Location(Uri.unsafeFromString(s"/todos/${createdTodo.id.get}")))
       } yield response
 
-    case req @ PUT -> Root / "todos" / LongVar(id) =>
+    case req @ PUT -> Root / LongVar(id) =>
       for {
         todo <-req.decodeJson[Todo]
         updateResult <- repository.updateTodo(id, todo)
         response <- todoResult(updateResult)
       } yield response
 
-    case DELETE -> Root / "todos" / LongVar(id) =>
+    case DELETE -> Root / LongVar(id) =>
       repository.deleteTodo(id).flatMap {
         case Left(TodoNotFoundError) => NotFound()
         case Right(_) => NoContent()
       }
   }
 
-  private def todoResult(result: Either[TodoNotFoundError.type, Todo]) = {
+  val routes: HttpRoutes[F] = Router(
+    prefixPath -> httpRoutes
+  )
+
+  private def todoResult(result: Either[DbError, Todo]) = {
     result match {
       case Left(TodoNotFoundError) => NotFound()
       case Right(todo) => Ok(todo.asJson)
