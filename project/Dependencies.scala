@@ -14,6 +14,7 @@ object Dependencies {
   val H2Version            = "2.0.202"
   val FlywayVersion        = "8.3.0"
   val ScalaMockVersion     = "5.2.0"
+  val CatsEffectTestKit    = "1.4.0"
 
   /** Build dependencies */
   val KindProjectorVersion = "0.13.2"
@@ -32,14 +33,15 @@ object Dependencies {
   )
 
   val testDependencies = Seq(
-    "org.scalatest"         %% "scalatest"            % ScalaTestVersion  % "it,test",
-    "org.http4s"            %% "http4s-blaze-client"  % Http4sVersion     % "it,test",
-    "com.h2database"        %  "h2"                   % H2Version         % "it,test",
-    "io.circe"              %% "circe-literal"        % CirceVersion      % "it,test",
-    "io.circe"              %% "circe-optics"         % CirceVersion      % "it,test",
-    "org.scalamock"         %% "scalamock"            % ScalaMockVersion  % "it,test",
-  )
+    "org.scalatest"         %% "scalatest"                      % ScalaTestVersion,
+    "org.http4s"            %% "http4s-blaze-client"            % Http4sVersion,
+    "com.h2database"        %  "h2"                             % H2Version,
+    "io.circe"              %% "circe-literal"                  % CirceVersion,
+    "io.circe"              %% "circe-optics"                   % CirceVersion,
+    "org.typelevel"         %% "cats-effect-testing-scalatest"  % CatsEffectTestKit,
+    "org.scalamock"         %% "scalamock"                      % ScalaMockVersion,
+  ).map(_ % "it,test")
 
   val kindProjector =
-    "org.typelevel"         %% "kind-projector"       % KindProjectorVersion cross CrossVersion.full
+    "org.typelevel"         %% "kind-projector"  % KindProjectorVersion cross CrossVersion.full
 }
