@@ -16,10 +16,10 @@ import fpa.repository._
 
 object ContactRepository {
 
-  def apply[F[_] : Sync](transactor: Transactor[F]): Repository[F, Contact] =
-    new Repository[F, Contact]("contacts") {
+  def apply(transactor: Transactor[IO]): Repository[IO, Contact] =
+    new Repository[IO, Contact]("contacts") {
 
-      def stream: Stream[F, Contact] =
+      def stream: Stream[IO, Contact] =
         sql"""
           SELECT
             id,
@@ -32,7 +32,7 @@ object ContactRepository {
         .stream
         .transact(transactor)
 
-      def create(contact: Contact): F[Result[Unit]] =
+      def create(contact: Contact): IO[Result[Unit]] =
         sql"""
           INSERT INTO contacts (
               id,
@@ -50,7 +50,7 @@ object ContactRepository {
         .transact(transactor)
         .map(expectUpdate(contact.id))
 
-      def read(id: Identity): F[Result[Contact]] =
+      def read(id: Identity): IO[Result[Contact]] =
         sql"""
           SELECT
             id,
@@ -69,7 +69,7 @@ object ContactRepository {
           case None => Left(NotFoundError(name, id))
         }
 
-      def delete(id: Identity): F[Result[Unit]] =
+      def delete(id: Identity): IO[Result[Unit]] =
         sql"""
           DELETE FROM
             contacts
@@ -81,7 +81,7 @@ object ContactRepository {
         .transact(transactor)
         .map(expectUpdate(id))
 
-      def update(contact: Contact): F[Result[Unit]] =
+      def update(contact: Contact): IO[Result[Unit]] =
         sql"""
           UPDATE
             contacts

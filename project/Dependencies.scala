@@ -2,30 +2,21 @@ import sbt._
 
 object Dependencies {
 
-  /** Core dependencies */
-  val CatsVersion          = "1.4.0"
-  val CatsEffectVersion    = "0.10.1"
-
   /** Platform dependencies */
-  val Http4sVersion        = "0.18.19"
-  val DoobieVersion        = "0.5.3"
-  val CirceVersion         = "0.9.3"
-  val PureConfigVersion    = "0.9.2"
-  val LogbackVersion       = "1.2.3"
+  val Http4sVersion        = "0.23.7"
+  val DoobieVersion        = "1.0.0-RC1"
+  val CirceVersion         = "0.14.1"
+  val PureConfigVersion    = "0.17.1"
+  val LogbackVersion       = "1.2.10"
 
   /** Test dependencies */
-  val ScalaTestVersion     = "3.0.5"
-  val H2Version            = "1.4.197"
-  val FlywayVersion        = "5.2.0"
+  val ScalaTestVersion     = "3.2.10"
+  val H2Version            = "2.0.202"
+  val FlywayVersion        = "8.3.0"
+  val ScalaMockVersion     = "5.2.0"
 
   /** Build dependencies */
-  val KindProjectorVersion = "0.11.0"
-
-  val coreDependencies = Seq(
-    "org.typelevel"         %% "cats-core"            % CatsVersion,
-    "org.typelevel"         %% "cats-macros"          % CatsVersion,
-    "org.typelevel"         %% "cats-effect"          % CatsEffectVersion,
-  )
+  val KindProjectorVersion = "0.13.2"
 
   val platformDependencies = Seq(
     "org.http4s"            %% "http4s-blaze-server"  % Http4sVersion,
@@ -46,6 +37,7 @@ object Dependencies {
     "com.h2database"        %  "h2"                   % H2Version         % "it,test",
     "io.circe"              %% "circe-literal"        % CirceVersion      % "it,test",
     "io.circe"              %% "circe-optics"         % CirceVersion      % "it,test",
+    "org.scalamock"         %% "scalamock"            % ScalaMockVersion  % "it,test",
   )
 
   val kindProjector =

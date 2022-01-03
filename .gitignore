@@ -1,2 +1,10 @@
 target
 /.idea
+/.metals
+/.vscode
+/.bloop
+/.bsp
+/.DS_Store
+/project/.bloop
+/project/project
+/project/metals.sbt

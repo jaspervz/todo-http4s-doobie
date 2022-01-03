@@ -1,78 +1,103 @@
 package contact
 
-import cats.implicits._
-import cats.effect.IO
+import cats.effect._
 
 import io.circe._
 import io.circe.literal._
-import io.circe.optics.JsonPath._
+import io.circe.optics._
 
-import org.http4s._
 import org.http4s.circe._
-import org.http4s.client.blaze._
-import org.http4s.server.blaze._
-import org.http4s.server.{Server => Http4sServer}
-import org.http4s.server.middleware.Logger
+import org.http4s.blaze.client.BlazeClientBuilder
+import org.http4s.{Method, Request, Status, Uri}
 
-import org.scalatest._
+import org.scalatest.BeforeAndAfterAll
+import org.scalatest.concurrent.Eventually
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.time.{Millis, Seconds, Span}
+import org.scalatest.wordspec.AnyWordSpec
 
-import fpa._
+import scala.concurrent.ExecutionContext
 
-class ContactServerSpec extends WordSpec with Matchers with BeforeAndAfterAll {
+import fpa.Config
+import org.http4s.client.Client
+import org.http4s.Response
 
-  private lazy val client = Http1Client[IO]().unsafeRunSync()
+class contactServerSpec
+  extends AnyWordSpec
+  with Matchers
+  with BeforeAndAfterAll
+  with Eventually {
 
-  private lazy val config = Config.load[IO]("test.conf").unsafeRunSync()
+  import cats.effect.unsafe.implicits.global
+  
+  import JsonPath._
 
-  private lazy val urlStart = s"http://${config.server.host}:${config.server.port}"
+  lazy val config: Config =
+    Config.load("test.conf").use(IO.pure).unsafeRunSync()
 
-  private val server = createServer().unsafeRunSync()
+  lazy val context =
+    s"http://${config.server.host}:${config.server.port}"
 
-  override def afterAll(): Unit = {
-    client.shutdown.unsafeRunSync()
-    server.shutdown.unsafeRunSync()
+  lazy val endpoint =
+    Uri.unsafeFromString(s"$context/contacts")
+
+  lazy val client: Resource[IO, Client[IO]] =
+    BlazeClientBuilder[IO].resource
+
+  def jsonResponseFrom(request: Request[IO]): Json =
+    client.use(_.expect[Json](request)).unsafeRunSync()
+
+  def jsonResponseFrom(uri: Uri): Json =
+    client.use(_.expect[Json](uri)).unsafeRunSync()
+
+  def endpointWith(id: String): Uri =
+    Uri.unsafeFromString(s"$context/contacts/$id")
+
+  implicit override val patienceConfig: PatienceConfig =
+    PatienceConfig(
+      timeout  = scaled(Span(5, Seconds)),
+      interval = scaled(Span(100, Millis))
+    )
+
+  override def beforeAll(): Unit = {
+    ContactServer.create("test.conf").unsafeRunAndForget()
+
+    eventually(client.use(_.statusFromUri(endpoint)).unsafeRunSync() shouldBe Status.Ok)
+
+    ()
   }
 
   "Contact server" should {
-    "create a Contact" in {
+    "create a contact" in {
       val description = "create contact"
-      val importance = "high"
-      val createJson =json"""
-        {
+      val importance  = "high"
+      val entity =
+        json"""{
           "description": $description,
           "importance": $importance
         }"""
-      val request = Request[IO](method = Method.POST, uri = Uri.unsafeFromString(s"$urlStart/contacts")).withBody(createJson).unsafeRunSync()
-      val json = client.expect[Json](request).unsafeRunSync()
+
+      val request = Request[IO](method = Method.POST, uri = endpoint).withEntity(entity)
+      val json = jsonResponseFrom(request)
+      
       root.id.string.getOption(json).nonEmpty shouldBe true
       root.description.string.getOption(json) shouldBe Some(description)
-      root.importance.string.getOption(json) shouldBe Some(importance)
+      root.importance.string.getOption(json)  shouldBe Some(importance)
     }
 
-    "update a Contact" in {
-      val id = createContact("update contact (before)", "low")
+    "update a contact" in {
+      val id = createContact("my contact 2", "low")
 
-      val description = "update contact (after)"
-      val importance = "medium"
-      val updateJson = json"""
-        {
+      val description = "updated contact"
+      val importance  = "medium"
+      val updateJson =
+        json"""{
           "description": $description,
           "importance": $importance
         }"""
-      val request = Request[IO](method = Method.PUT, uri = Uri.unsafeFromString(s"$urlStart/contacts/$id")).withBody(updateJson).unsafeRunSync()
-      client.expect[Json](request).unsafeRunSync() shouldBe json"""
-        {
-          "id": $id,
-          "description": $description,
-          "importance": $importance
-        }"""
-    }
 
-    "return a single Contact" in {
-      val description = "read contact"
-      val importance = "medium"
-      val id = createContact(description, importance)
-      client.expect[Json](Uri.unsafeFromString(s"$urlStart/contacts/$id")).unsafeRunSync() shouldBe json"""
+      val request = Request[IO](method = Method.PUT, uri = endpointWith(id)).withEntity(updateJson)
+      jsonResponseFrom(request) shouldBe json"""
         {
           "id": $id,
           "description": $description,
@@ -80,35 +105,49 @@ class ContactServerSpec extends WordSpec with Matchers with BeforeAndAfterAll {
         }"""
     }
 
-    "delete a Contact" in {
-      val description = "delete contact"
-      val importance = "low"
+    "return a single contact" in {
+      val description = "my contact 3"
+      val importance  = "medium"
       val id = createContact(description, importance)
-      val deleteRequest = Request[IO](method = Method.DELETE, uri = Uri.unsafeFromString(s"$urlStart/contacts/$id"))
-      client.status(deleteRequest).unsafeRunSync() shouldBe Status.NoContent
 
-      val getRequest = Request[IO](method = Method.GET, uri = Uri.unsafeFromString(s"$urlStart/contacts/$id"))
-      client.status(getRequest).unsafeRunSync() shouldBe Status.NotFound
+      client.use(_.expect[Json](endpointWith(id))).unsafeRunSync() shouldBe json"""
+        {
+          "id": $id,
+          "description": $description,
+          "importance": $importance
+        }"""
     }
 
-    "return all Contacts" in {
-      // Remove all existing Contacts
-      val contacts = client.expect[Json](Uri.unsafeFromString(s"$urlStart/contacts")).unsafeRunSync()
-      root.each.id.string.getAll(contacts).map(id => {
-        val req = Request[IO](method = Method.DELETE, uri = Uri.unsafeFromString(s"$urlStart/contacts/$id"))
-        client.status(req).map(_ shouldBe Status.NoContent)
-      }).sequence.unsafeRunSync()
+    "delete a contact" in {
+      val description = "my contact 4"
+      val importance  = "low"
+      val id = createContact(description, importance)
 
-      // Add new Contacts
-      val description1 = "all contact (1)"
-      val description2 = "all contact (2)"
+      val deleteRequest = Request[IO](method = Method.DELETE, uri = endpointWith(id))
+      client.use(_.status(deleteRequest)).unsafeRunSync() shouldBe Status.NoContent
+
+      val getRequest = Request[IO](method = Method.GET, uri = endpointWith(id))
+      client.use(_.status(getRequest)).unsafeRunSync() shouldBe Status.NotFound
+    }
+
+    "return all contacts" in {
+      // Remove all existing contacts
+      val json = client.use(_.expect[Json](endpoint)).unsafeRunSync()
+      root.each.id.string.getAll(json).foreach { id =>
+        val deleteRequest = Request[IO](method = Method.DELETE, uri = endpointWith(id))
+        client.use(_.status(deleteRequest)).unsafeRunSync() shouldBe Status.NoContent
+      }
+
+      // Add new contacts
+      val description1 = "my contact 1"
+      val description2 = "my contact 2"
       val importance1 = "high"
       val importance2 = "low"
       val id1 = createContact(description1, importance1)
       val id2 = createContact(description2, importance2)
 
-      // Retrieve Contacts
-      client.expect[Json](Uri.unsafeFromString(s"$urlStart/contacts")).unsafeRunSync shouldBe json"""
+      // Retrieve contacts
+      client.use(_.expect[Json](endpoint)).unsafeRunSync() shouldBe json"""
         [
           {
             "id": $id1,
@@ -124,28 +163,16 @@ class ContactServerSpec extends WordSpec with Matchers with BeforeAndAfterAll {
     }
   }
 
-  private def createContact(description: String, importance: String): Identity = {
-    val createJson =json"""
+  private def createContact(description: String, importance: String): String = {
+    val createJson = json"""
       {
         "description": $description,
         "importance": $importance
       }"""
-    val request = Request[IO](method = Method.POST, uri = Uri.unsafeFromString(s"$urlStart/contacts")).withBody(createJson).unsafeRunSync()
-    val json = client.expect[Json](request).unsafeRunSync()
-    root.id.string.getOption(json).nonEmpty shouldBe true
-    Identity(root.id.string.getOption(json).get)
-  }
+    val request = Request[IO](method = Method.POST, uri = endpoint).withEntity(createJson)
+    val json = jsonResponseFrom(request)
 
-  private def createServer(): IO[Http4sServer[IO]] = {
-    for {
-      transactor <- Database.transactor[IO](config.database)
-      _          <- Database.initialize(transactor)
-      repository =  ContactRepository(transactor)
-      service    =  ContactService(repository)
-      http       =  Logger(config.logging.logHeaders, config.logging.logBody)(service.http)
-      server     <- BlazeBuilder[IO]
-                      .bindHttp(config.server.port, config.server.host)
-                      .mountService(http, "/").start
-    } yield server
+    root.id.string.getOption(json).nonEmpty shouldBe true
+    root.id.string.getOption(json).get
   }
 }

@@ -6,7 +6,7 @@ import fpa._
 
 object ContactService {
 
-  def apply[F[_] : Effect](repository: Repository[F, Contact]): Service[F, Contact] =
-    new Service[F, Contact]("contacts", repository)
+  def apply(repository: Repository[IO, Contact]): Service[Contact] =
+    new Service[Contact]("contacts", repository)
 
 }

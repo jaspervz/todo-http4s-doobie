@@ -18,17 +18,16 @@ import repository._
 import service._
 
 import scala.util.Try
+import org.http4s.HttpRoutes
 
-class Service[F[_] : Effect, A : Decoder : Encoder : HasIdentity[F, *]](
-  segment: String, repository: Repository[F, A]
-) extends Http4sDsl[F] {
+class Service[A : Decoder : Encoder : HasIdentity[IO, *]](segment: String, repository: Repository[IO, A]) extends Http4sDsl[IO] {
 
-  type EndPoint = Kleisli[F, Request[F], Response[F]]
+  type EndPoint = Kleisli[IO, Request[IO], Response[IO]]
   val  EndPoint = Kleisli
 
-  val E = implicitly[HasIdentity[F, A]]
+  val E = implicitly[HasIdentity[IO, A]]
 
-  def http = HttpService[F] {
+  def http = HttpRoutes.of[IO] {
     case req @ POST    -> Root / `segment`                    =>  create(req)
     case req @ PUT     -> Root / `segment` / IdentityVar(id)  =>  update(id)(req)
     case req @ GET     -> Root / `segment` / IdentityVar(id)  =>  read(id)(req)
@@ -72,23 +71,23 @@ class Service[F[_] : Effect, A : Decoder : Encoder : HasIdentity[F, *]](
         Stream("[")
         ++ repository.stream.map(_.asJson.noSpaces).intersperse(",")
         ++ Stream("]"),
-        `Content-Type`(MediaType.`application/json`)
+        `Content-Type`(new MediaType("application", "json"))
       )
     )
 
-  private def httpOkOr404(a: A)(result: Either[_, _]): F[Response[F]] =
+  private def httpOkOr404(a: A)(result: Either[_, _]): IO[Response[IO]] =
     result match {
       case Left(_)  => NotFound()
       case _        => Ok(a.asJson)
     }
 
-  private def httpOkOr404(result: Either[_, A]): F[Response[F]] =
+  private def httpOkOr404(result: Either[_, A]): IO[Response[IO]] =
     result match {
       case Left(_)  => NotFound()
       case Right(a) => Ok(a.asJson)
     }
 
-  private def httpCreatedOr500(a: A)(result: Either[_, _]): F[Response[F]] =
+  private def httpCreatedOr500(a: A)(result: Either[_, _]): IO[Response[IO]] =
     result match {
       case Left(e)  =>
         InternalServerError(e.toString)

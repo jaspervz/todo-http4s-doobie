@@ -26,7 +26,7 @@ object Importance {
     Decoder.decodeString.map[Importance](Importance.unsafeFromString)
 
   implicit val importanceMeta: Meta[Importance] =
-    Meta[String].xmap(Importance.unsafeFromString, _.value)
+    Meta[String].imap(Importance.unsafeFromString)(_.value)
 
 }
 
