@@ -3,12 +3,11 @@ import config.Config
 import db.Database
 import doobie.hikari.HikariTransactor
 import doobie.util.ExecutionContexts
-import org.http4s.dsl.io._
 import org.http4s.implicits._
-import org.http4s.server.blaze._
 import repository.TodoRepository
 import service.TodoService
 import scala.concurrent.ExecutionContext.global
+import org.http4s.blaze.server.BlazeServerBuilder
 
 object HttpServer {
   def create(configFile: String = "application.conf")(implicit contextShift: ContextShift[IO], concurrentEffect: ConcurrentEffect[IO], timer: Timer[IO]): IO[ExitCode] = {
