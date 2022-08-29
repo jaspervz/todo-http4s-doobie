@@ -15,7 +15,7 @@ package object config {
   object Config {
     def load(configFile: String = "application.conf")(implicit cs: ContextShift[IO]): Resource[IO, Config] = {
       Blocker[IO].flatMap { blocker =>
-        Resource.liftF(ConfigSource.fromConfig(ConfigFactory.load(configFile)).loadF[IO, Config](blocker))
+        Resource.eval(ConfigSource.fromConfig(ConfigFactory.load(configFile)).loadF[IO, Config](blocker))
       }
     }
   }

@@ -10,7 +10,7 @@ lazy val commonSettings = Seq(
   ),
 )
 
-lazy val Http4sVersion = "0.21.15"
+lazy val Http4sVersion = "0.21.33"
 
 lazy val DoobieVersion = "0.10.0"
 
