@@ -1,6 +1,7 @@
 package service
 
 import cats.effect.IO
+import cats.effect.unsafe.IORuntime
 import fs2.Stream
 import io.circe.Json
 import io.circe.literal._
@@ -18,6 +19,8 @@ class TodoServiceSpec extends AnyWordSpec with MockFactory with Matchers {
   private val repository = stub[TodoRepository]
 
   private val service = new TodoService(repository).routes
+
+  private implicit val runtime: IORuntime = cats.effect.unsafe.IORuntime.global
 
   "TodoService" should {
     "create a todo" in {

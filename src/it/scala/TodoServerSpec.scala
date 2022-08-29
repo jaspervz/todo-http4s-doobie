@@ -1,8 +1,10 @@
-import cats.effect.{ContextShift, IO, Timer}
+import cats.effect.{ExitCode, IO}
+import cats.effect.unsafe.IORuntime
 import config.Config
 import io.circe.Json
 import io.circe.literal._
 import io.circe.optics.JsonPath._
+import org.http4s.blaze.client.BlazeClientBuilder
 import org.http4s.circe._
 import org.http4s.{Method, Request, Status, Uri}
 import org.scalatest.BeforeAndAfterAll
@@ -10,16 +12,11 @@ import org.scalatest.concurrent.Eventually
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.time.{Millis, Seconds, Span}
 import org.scalatest.wordspec.AnyWordSpec
-import org.http4s.blaze.client.BlazeClientBuilder
+import org.slf4j.LoggerFactory
 
-import scala.concurrent.ExecutionContext
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class TodoServerSpec extends AnyWordSpec with Matchers with BeforeAndAfterAll with Eventually {
-  private implicit val timer: Timer[IO] = IO.timer(ExecutionContext.global)
-
-  private implicit val contextShift: ContextShift[IO] = IO.contextShift(ExecutionContext.global)
-
   private lazy val client = BlazeClientBuilder[IO](global).resource
 
   private val configFile = "test.conf"
@@ -30,8 +27,12 @@ class TodoServerSpec extends AnyWordSpec with Matchers with BeforeAndAfterAll wi
 
   implicit override val patienceConfig: PatienceConfig = PatienceConfig(timeout = scaled(Span(5, Seconds)), interval = scaled(Span(100, Millis)))
 
+  private implicit val runtime: IORuntime = cats.effect.unsafe.IORuntime.global
+
+  private val logger = LoggerFactory.getLogger(classOf[TodoServerSpec])
+
   override def beforeAll(): Unit = {
-    HttpServer.create(configFile).unsafeRunAsyncAndForget()
+    HttpServer.create(configFile).unsafeRunAsync(resultHandler)
     eventually {
       client.use(_.statusFromUri(Uri.unsafeFromString(s"$urlStart/todos"))).unsafeRunSync() shouldBe Status.Ok
     }
@@ -139,5 +140,9 @@ class TodoServerSpec extends AnyWordSpec with Matchers with BeforeAndAfterAll wi
     val json = client.use(_.expect[Json](request)).unsafeRunSync()
     root.id.long.getOption(json).nonEmpty shouldBe true
     root.id.long.getOption(json).get
+  }
+
+  private def resultHandler(result: Either[Throwable, ExitCode]): Unit = {
+    result.left.foreach(t => logger.error("Executing the http server failed", t))
   }
 }
