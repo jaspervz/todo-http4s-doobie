@@ -24,7 +24,7 @@ lazy val PureConfigVersion = "0.12.3"
 
 lazy val LogbackVersion = "1.2.3"
 
-lazy val ScalaTestVersion = "3.2.3"
+lazy val ScalaTestVersion = "3.2.13"
 
 lazy val ScalaMockVersion = "5.2.0"
 
