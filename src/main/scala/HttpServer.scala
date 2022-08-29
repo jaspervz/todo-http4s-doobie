@@ -26,7 +26,7 @@ object HttpServer {
     for {
       _ <- Database.initialize(resources.transactor)
       repository = new TodoRepository(resources.transactor)
-      exitCode <- BlazeServerBuilder[IO](global)
+      exitCode <- BlazeServerBuilder[IO]
         .bindHttp(resources.config.server.port, resources.config.server.host)
         .withHttpApp(new TodoService(repository).routes.orNotFound).serve.compile.lastOrError
     } yield exitCode

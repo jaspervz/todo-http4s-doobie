@@ -14,10 +14,8 @@ import org.scalatest.time.{Millis, Seconds, Span}
 import org.scalatest.wordspec.AnyWordSpec
 import org.slf4j.LoggerFactory
 
-import scala.concurrent.ExecutionContext.Implicits.global
-
 class TodoServerSpec extends AnyWordSpec with Matchers with BeforeAndAfterAll with Eventually {
-  private lazy val client = BlazeClientBuilder[IO](global).resource
+  private lazy val client = BlazeClientBuilder[IO].resource
 
   private val configFile = "test.conf"
 
