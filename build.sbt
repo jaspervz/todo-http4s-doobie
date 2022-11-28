@@ -1,9 +1,9 @@
- import Dependencies.{kindProjector, _}
+import Dependencies._
 
 lazy val commonSettings = Seq(
   name         := "fpa-ms-contact",
   version      := "0.1.0",
-  scalaVersion := "2.13.7"
+  scalaVersion := ScalaLanguageVersion
 )
 
 scalacOptions := Seq(
@@ -19,6 +19,5 @@ lazy val `fpa-ms-contact` = (project in file("."))
   .settings(
     commonSettings,
     Defaults.itSettings,
-    libraryDependencies ++= platformDependencies ++ testDependencies,
-    addCompilerPlugin(kindProjector)
+    libraryDependencies ++= platformDependencies ++ testDependencies
   )

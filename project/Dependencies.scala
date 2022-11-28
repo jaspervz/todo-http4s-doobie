@@ -2,18 +2,20 @@ import sbt._
 
 object Dependencies {
 
+  /** Language dependencies */
+  val ScalaLanguageVersion = "3.2.1"
+
   /** Platform dependencies */
   val Http4sVersion        = "0.23.7"
   val DoobieVersion        = "1.0.0-RC1"
-  val CirceVersion         = "0.14.1"
-  val PureConfigVersion    = "0.17.1"
+  val CirceVersion         = "0.14.3"
+  val PureConfigVersion    = "0.17.2"
   val LogbackVersion       = "1.2.10"
 
   /** Test dependencies */
-  val ScalaTestVersion     = "3.2.10"
+  val ScalaTestVersion     = "3.2.14"
   val H2Version            = "2.0.202"
   val FlywayVersion        = "8.3.0"
-  val ScalaMockVersion     = "5.2.0"
   val CatsEffectTestKit    = "1.4.0"
 
   /** Build dependencies */
@@ -28,7 +30,7 @@ object Dependencies {
     "org.tpolecat"          %% "doobie-hikari"        % DoobieVersion,
     "org.flywaydb"          %  "flyway-core"          % FlywayVersion,
     "io.circe"              %% "circe-generic"        % CirceVersion,
-    "com.github.pureconfig" %% "pureconfig"           % PureConfigVersion,
+    "com.github.pureconfig" %% "pureconfig-core"      % PureConfigVersion,
     "ch.qos.logback"        %  "logback-classic"      % LogbackVersion,
   )
 
@@ -37,11 +39,6 @@ object Dependencies {
     "org.http4s"            %% "http4s-blaze-client"            % Http4sVersion,
     "com.h2database"        %  "h2"                             % H2Version,
     "io.circe"              %% "circe-literal"                  % CirceVersion,
-    "io.circe"              %% "circe-optics"                   % CirceVersion,
     "org.typelevel"         %% "cats-effect-testing-scalatest"  % CatsEffectTestKit,
-    "org.scalamock"         %% "scalamock"                      % ScalaMockVersion,
   ).map(_ % "it,test")
-
-  val kindProjector =
-    "org.typelevel"         %% "kind-projector"  % KindProjectorVersion cross CrossVersion.full
 }

@@ -14,18 +14,14 @@ import org.http4s.circe._
 import org.http4s.dsl.Http4sDsl
 import org.http4s.headers._
 
-import repository._
-import service._
-
 import scala.util.Try
 import org.http4s.HttpRoutes
 
-class Service[A : Decoder : Encoder : HasIdentity[IO, *]](segment: String, repository: Repository[IO, A]) extends Http4sDsl[IO] {
+class Service[A : Decoder : Encoder](segment: String, repository: Repository[IO, A])(using E : HasIdentity[IO, A])
+  extends Http4sDsl[IO]:
 
   type EndPoint = Kleisli[IO, Request[IO], Response[IO]]
   val  EndPoint = Kleisli
-
-  val E = implicitly[HasIdentity[IO, A]]
 
   def http = HttpRoutes.of[IO] {
     case req @ POST    -> Root / `segment`                    =>  create(req)
@@ -94,14 +90,10 @@ class Service[A : Decoder : Encoder : HasIdentity[IO, *]](segment: String, repos
       case _        =>
         E.id(a).flatMap(id => Created(a.asJson, Location(Uri.unsafeFromString(s"/$segment/${id.get}"))))
     }
-}
 
-package object service {
 
-  object IdentityVar extends PathVar(Identity.apply)
+object IdentityVar extends PathVar(Identity.apply)
 
-  protected class PathVar[A](cast: String => A) {
-    def unapply(str: String): Option[A] =
-      Try(cast(str)).toOption
-  }
-}
+protected class PathVar[A](cast: String => A):
+  def unapply(str: String): Option[A] =
+    Try(cast(str)).toOption

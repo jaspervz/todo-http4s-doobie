@@ -15,31 +15,9 @@ import org.http4s.dsl.io._
 import doobie.util._
 import doobie.hikari._
 
-import fpa._
+import fpa.*
 import org.http4s.server.Server
 
-
-// object ContactServer extends IOApp {
-
-//   def run(args: List[String]): IO[ExitCode] = {
-//     val server = for {
-//       config     <- Config.load[IO]()
-//       transactor <- Database.transactor[IO](config.database)
-//       _          <- Database.initialize(transactor)
-//       repository =  ContactRepository(transactor)
-//       service    =  ContactService(repository)
-//       http       =  Logger(config.logging.logHeaders, config.logging.logBody, service.http)
-//       code       <- BlazeServerBuilder[IO]
-//                       .bindHttp(config.server.port, config.server.host)
-//                       .withHttpApp(http)
-//                       .resource
-//                       .use(_ => IO.never)
-//                       .as(ExitCode.Success)
-//     } yield code
-
-//     server
-//   }
-// }
 
 object ContactServer extends IOApp {
 

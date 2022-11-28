@@ -2,19 +2,18 @@ package contact
 
 import java.util.UUID
 
-import cats.implicits._
-import cats.effect._
+import cats.implicits.*
+import cats.effect.*
+
+import fs2.*
 
 import doobie.Meta
-import doobie.implicits._
-import doobie.util.transactor._
+import doobie.implicits.*
+import doobie.util.transactor.*
 
-import fs2._
+import fpa.*
 
-import fpa._
-import fpa.repository._
-
-object ContactRepository {
+object ContactRepository:
 
   def apply(transactor: Transactor[IO]): Repository[IO, Contact] =
     new Repository[IO, Contact]("contacts") {
@@ -109,5 +108,3 @@ object ContactRepository {
 
   implicit val uuidMeta: Meta[UUID] =
     doobie.h2.implicits.UuidType
-
-}
