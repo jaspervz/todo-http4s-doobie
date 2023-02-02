@@ -13,7 +13,7 @@ import org.http4s.blaze.server._
 import org.http4s.dsl.io._
 
 import doobie.util._
-import doobie.hikari._
+import doobie.hikari.HikariTransactor
 
 import fpa.*
 import org.http4s.server.Server
