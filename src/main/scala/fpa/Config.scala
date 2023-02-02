@@ -3,8 +3,15 @@ package fpa
 import pureconfig.*
 import pureconfig.error.*
 import pureconfig.generic.derivation.default.*
+import com.comcast.ip4s.*
 
-case class ServerConfig(host: String, port: Int)
+implicit val hostConfigReader: ConfigReader[Host] =
+  ConfigReader.fromString[Host](ConvertHelpers.optF(Host.fromString))
+
+implicit val portConfigReader: ConfigReader[Port] =
+  ConfigReader.intConfigReader.map(_.toString).emap(ConvertHelpers.optF(Port.fromString))
+
+case class ServerConfig(host: Host, port: Port)
   derives ConfigReader
 
 case class DatabaseConfig(driver: String, url: String, user: String, password: String, threadPoolSize: Int)
@@ -25,7 +32,7 @@ object Config:
 
   import com.typesafe.config.ConfigFactory
 
-  def load(file: String = "application.conf"): Resource[IO, Config] =
+  def load: Resource[IO, Config] =
     val config = IO.delay(ConfigSource.default.load[Config]).flatMap {
       case Left(error)  => IO.raiseError[Config](new ConfigReaderException[Config](error))
       case Right(value) => IO.pure(value)
