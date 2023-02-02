@@ -1,16 +1,16 @@
 package contact
 
-import cats.effect._
-import cats.implicits._
+import cats.effect.*
+import cats.implicits.*
 
-import fs2._
+import fs2.*
 
 import scala.concurrent.ExecutionContext.global
 
-import org.http4s.server.middleware._
-import org.http4s.implicits._
-import org.http4s.blaze.server._
-import org.http4s.dsl.io._
+import org.http4s.server.middleware.*
+import org.http4s.implicits.*
+import org.http4s.ember.server.*
+import org.http4s.dsl.io.*
 
 import doobie.util._
 import doobie.hikari.HikariTransactor
@@ -21,12 +21,12 @@ import org.http4s.server.Server
 
 object ContactServer extends IOApp {
 
-  def create(configFile: String = "application.conf"): IO[ExitCode] =
-    resources(configFile).use(instantiate)
+  def create: IO[ExitCode] =
+    resources.use(instantiate)
 
-  def resources(configFile: String): Resource[IO, Resources] =
+  def resources: Resource[IO, Resources] =
     for {
-      config     <- Config.load(configFile)
+      config     <- Config.load
       ec         <- ExecutionContexts.fixedThreadPool[IO](config.database.threadPoolSize)
       transactor <- Database.transactor(config.database)(ec)
     } yield Resources(transactor, config)
@@ -35,16 +35,19 @@ object ContactServer extends IOApp {
     for {
       _          <- Database.initialize(resources.transactor)
       repository =  ContactRepository(resources.transactor)
-      exitCode   <- BlazeServerBuilder[IO]
-                      .bindHttp(resources.config.server.port, resources.config.server.host)
+      exitCode   <- EmberServerBuilder
+                      .default[IO]
+                      .withHost(resources.config.server.host)
+                      .withPort(resources.config.server.port)
                       .withHttpApp(ContactService(repository).http.orNotFound)
-                      .serve
-                      .compile
-                      .lastOrError
+                      .build
+                      .use(_ => IO.never)
+                      .as(ExitCode.Success)
     } yield exitCode
   }
 
   case class Resources(transactor: HikariTransactor[IO], config: Config)
 
-  def run(args: List[String]): IO[ExitCode] = create()
+  def run(args: List[String]): IO[ExitCode] =
+    create
 }

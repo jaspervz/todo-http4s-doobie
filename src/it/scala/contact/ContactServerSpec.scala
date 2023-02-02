@@ -28,7 +28,7 @@ class ContactServerSpec
 
 
   val server: IO[ExitCode] =
-    ContactServer.create("test.conf")
+    ContactServer.create
 
   var shutdown: () => Future[Unit] =
     println("Start ContactServer..")
@@ -48,10 +48,10 @@ class ContactServerSpec
     println("ContactServer stopped.")
 
   lazy val client: Resource[IO, org.http4s.client.Client[IO]] =
-    org.http4s.blaze.client.BlazeClientBuilder[IO].resource
+    org.http4s.ember.client.EmberClientBuilder.default[IO].build
 
   val config: Config =
-    Config.load("test.conf").use(IO.pure).unsafeRunSync()
+    Config.load.use(IO.pure).unsafeRunSync()
 
   val endpoint: Uri =
     Uri.unsafeFromString(s"http://${config.server.host}:${config.server.port}/contacts")

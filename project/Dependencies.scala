@@ -22,7 +22,7 @@ object Dependencies {
   val KindProjectorVersion = "0.13.2"
 
   val platformDependencies = Seq(
-    "org.http4s"            %% "http4s-blaze-server"  % Http4sVersion,
+    "org.http4s"            %% "http4s-ember-server"  % Http4sVersion,
     "org.http4s"            %% "http4s-circe"         % Http4sVersion,
     "org.http4s"            %% "http4s-dsl"           % Http4sVersion,
     "org.tpolecat"          %% "doobie-core"          % DoobieVersion,
@@ -36,7 +36,7 @@ object Dependencies {
 
   val testDependencies = Seq(
     "org.scalatest"         %% "scalatest"                      % ScalaTestVersion,
-    "org.http4s"            %% "http4s-blaze-client"            % Http4sVersion,
+    "org.http4s"            %% "http4s-ember-client"            % Http4sVersion,
     "com.h2database"        %  "h2"                             % H2Version,
     "io.circe"              %% "circe-literal"                  % CirceVersion,
     "org.typelevel"         %% "cats-effect-testing-scalatest"  % CatsEffectTestKit,
