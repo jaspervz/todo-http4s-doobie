@@ -15,7 +15,7 @@ object Dependencies {
   /** Test dependencies */
   val ScalaTestVersion     = "3.2.15"
   val H2Version            = "2.1.214"
-  val FlywayVersion        = "9.16.1"
+  val FlywayVersion        = "9.16.3"
   val CatsEffectTestKit    = "1.5.0"
 
   /** Build dependencies */
