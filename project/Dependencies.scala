@@ -10,7 +10,7 @@ object Dependencies {
   val DoobieVersion        = "1.0.0-RC2"
   val CirceVersion         = "0.14.5"
   val PureConfigVersion    = "0.17.3"
-  val LogbackVersion       = "1.4.6"
+  val LogbackVersion       = "1.4.7"
 
   /** Test dependencies */
   val ScalaTestVersion     = "3.2.15"
