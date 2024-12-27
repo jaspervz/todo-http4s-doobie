@@ -24,9 +24,9 @@ lazy val PureConfigVersion = "0.17.1"
 
 lazy val LogbackVersion = "1.2.11"
 
-lazy val ScalaTestVersion = "3.2.13"
+lazy val ScalaTestVersion = "3.2.19"
 
-lazy val ScalaMockVersion = "5.2.0"
+lazy val ScalaMockVersion = "6.0.0"
 
 lazy val root = (project in file("."))
   .configs(IntegrationTest)
