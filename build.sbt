@@ -16,7 +16,7 @@ lazy val DoobieVersion = "1.0.0-RC6"
 
 lazy val H2Version = "2.3.232"
 
-lazy val FlywayVersion = "9.2.0"
+lazy val FlywayVersion = "11.1.0"
 
 lazy val CirceVersion = "0.14.1"
 
