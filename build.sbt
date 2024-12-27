@@ -14,7 +14,7 @@ lazy val Http4sVersion = "0.23.12"
 
 lazy val DoobieVersion = "1.0.0-RC2"
 
-lazy val H2Version = "2.1.214"
+lazy val H2Version = "2.3.232"
 
 lazy val FlywayVersion = "9.2.0"
 
