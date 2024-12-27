@@ -18,7 +18,7 @@ lazy val H2Version = "2.3.232"
 
 lazy val FlywayVersion = "9.2.0"
 
-lazy val CirceVersion = "0.14.10"
+lazy val CirceVersion = "0.14.1"
 
 lazy val PureConfigVersion = "0.17.8"
 
