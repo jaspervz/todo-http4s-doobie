@@ -1,4 +1,5 @@
 import cats.effect._
+import com.comcast.ip4s.{Host, Port}
 import config.Config
 import db.Database
 import doobie.hikari.HikariTransactor
@@ -6,8 +7,7 @@ import doobie.util.ExecutionContexts
 import org.http4s.implicits._
 import repository.TodoRepository
 import service.TodoService
-import scala.concurrent.ExecutionContext.global
-import org.http4s.blaze.server.BlazeServerBuilder
+import org.http4s.ember.server.EmberServerBuilder
 
 object HttpServer {
   def create(configFile: String = "application.conf"): IO[ExitCode] = {
@@ -26,9 +26,16 @@ object HttpServer {
     for {
       _ <- Database.initialize(resources.transactor)
       repository = new TodoRepository(resources.transactor)
-      exitCode <- BlazeServerBuilder[IO]
-        .bindHttp(resources.config.server.port, resources.config.server.host)
-        .withHttpApp(new TodoService(repository).routes.orNotFound).serve.compile.lastOrError
+      port <- IO.fromOption(Port.fromInt(resources.config.server.port))(new IllegalArgumentException(s"Port number ${resources.config.server.port} not valid, min value ${Port.MinValue}, max value ${Port.MaxValue}"))
+      host <- IO.fromOption(Host.fromString(resources.config.server.host))(new IllegalArgumentException(s"${resources.config.server.host} is not a valid host"))
+      exitCode <- EmberServerBuilder
+        .default[IO]
+        .withHost(host)
+        .withPort(port)
+        .withHttpApp(new TodoService(repository).routes.orNotFound)
+        .build
+        .use(_ => IO.never)
+        .as(ExitCode.Success)
     } yield exitCode
   }
 

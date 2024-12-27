@@ -4,8 +4,8 @@ import config.Config
 import io.circe.Json
 import io.circe.literal._
 import io.circe.optics.JsonPath._
-import org.http4s.blaze.client.BlazeClientBuilder
 import org.http4s.circe._
+import org.http4s.ember.client.EmberClientBuilder
 import org.http4s.{Method, Request, Status, Uri}
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.concurrent.Eventually
@@ -15,7 +15,7 @@ import org.scalatest.wordspec.AnyWordSpec
 import org.slf4j.LoggerFactory
 
 class TodoServerSpec extends AnyWordSpec with Matchers with BeforeAndAfterAll with Eventually {
-  private lazy val client = BlazeClientBuilder[IO].resource
+  private lazy val client = EmberClientBuilder.default[IO].build
 
   private val configFile = "test.conf"
 
