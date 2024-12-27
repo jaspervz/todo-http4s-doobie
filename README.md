@@ -69,6 +69,9 @@ Using [Flyway](https://flywaydb.org/) the database migrations are performed when
 This example project contains both unit tests, which mock the repository that accesses the database, and
 integration tests that use the [http4s](http://http4s.org/) HTTP client to perform actual requests.
 
+Run the tests with `sbt test`. The integration tests are in a separate sbt project,
+run them with `sbt "integrationTest / test"`
+
 ## Running
 You can run the microservice with `sbt run`. By default it listens to port number 8080, you can change
 this in the `application.conf`.
