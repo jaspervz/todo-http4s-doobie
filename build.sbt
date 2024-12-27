@@ -18,7 +18,9 @@ lazy val H2Version = "2.3.232"
 
 lazy val FlywayVersion = "11.1.0"
 
-lazy val CirceVersion = "0.14.1"
+lazy val CirceVersion = "0.14.10"
+
+lazy val CirceOpticsVersion = "0.15.0"
 
 lazy val PureConfigVersion = "0.17.8"
 
@@ -48,8 +50,8 @@ lazy val root = (project in file("."))
       "org.flywaydb"          %  "flyway-core"          % FlywayVersion,
 
       "io.circe"              %% "circe-generic"        % CirceVersion,
-      "io.circe"              %% "circe-literal"        % CirceVersion      % "it,test",
-      "io.circe"              %% "circe-optics"         % CirceVersion      % "it",
+      "io.circe"              %% "circe-literal"        % CirceVersion        % "it,test",
+      "io.circe"              %% "circe-optics"         % CirceOpticsVersion  % "it",
 
       "com.github.pureconfig" %% "pureconfig"             % PureConfigVersion,
       "com.github.pureconfig" %% "pureconfig-cats-effect" % PureConfigVersion,
