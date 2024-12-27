@@ -22,7 +22,7 @@ lazy val CirceVersion = "0.14.1"
 
 lazy val PureConfigVersion = "0.17.8"
 
-lazy val LogbackVersion = "1.2.11"
+lazy val LogbackVersion = "1.5.15"
 
 lazy val ScalaTestVersion = "3.2.19"
 
