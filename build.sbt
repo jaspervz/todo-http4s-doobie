@@ -1,7 +1,7 @@
 lazy val commonSettings = Seq(
   name := "todo http4s doobie",
   version := "1.0-SNAPSHOT",
-  scalaVersion := "2.13.8",
+  scalaVersion := "2.13.15",
   scalacOptions ++= Seq(
     "-deprecation",
     "-Xfatal-warnings",
