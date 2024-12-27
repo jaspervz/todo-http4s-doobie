@@ -26,6 +26,8 @@ lazy val PureConfigVersion = "0.17.8"
 
 lazy val LogbackVersion = "1.5.15"
 
+lazy val JansiVersion = "2.4.1"
+
 lazy val ScalaTestVersion = "3.2.19"
 
 lazy val ScalaMockVersion = "6.0.0"
@@ -57,6 +59,7 @@ lazy val root = (project in file("."))
       "com.github.pureconfig" %% "pureconfig-cats-effect" % PureConfigVersion,
 
       "ch.qos.logback"        %  "logback-classic"      % LogbackVersion,
+      "org.fusesource.jansi"  % "jansi"                 % JansiVersion,
 
       "org.scalatest"         %% "scalatest"            % ScalaTestVersion  % "it,test",
       "org.scalamock"         %% "scalamock"            % ScalaMockVersion  % "test"
